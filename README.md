@@ -131,7 +131,8 @@ cd app && npm ci && npm run dev
 ```
 
 The GitHub Actions workflows `agent.yml` (every 4 h) and `keeper.yml` (hourly) run the same scripts and publish
-rationale notes and status to the `notes` branch.
+rationale notes and status to the `notes` branch. `tick.yml` starts them on that schedule, because GitHub's own cron
+trigger ran hours late for this repository.
 
 ## Honest notes
 

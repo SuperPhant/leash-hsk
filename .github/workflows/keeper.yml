@@ -2,9 +2,8 @@ name: keeper
 
 # The keeper: mirrors HSK Chain mainnet prices (APRO feeds, HSKSwap TWAP) to the testnet, realigns the testnet HSKSwap
 # pools with them, and enforces every vault's stop-loss and drawdown breaker. Independent of the AI agent.
+# Runs hourly at :47 UTC, dispatched by tick.yml.
 on:
-  schedule:
-    - cron: "47 * * * *"
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,50 @@
+name: tick
+
+# The schedule for this repository's workflows. GitHub's own cron trigger ran hours late, or not at all, here, so this
+# chain keeps them on time: each run waits out the `tick` environment's timer (about an hour; no runner is held while
+# it waits), dispatches every workflow below whose cron slot has passed without a run (.github/tick.py), then queues
+# the next tick. The concurrency group keeps it to one chain; the cron trigger below only restarts it if it breaks.
+# Start or restart by hand: gh workflow run tick.yml. Stop: disable this workflow.
+on:
+  schedule:
+    - cron: "11 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: tick
+      deployment: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/tick.py
+          sparse-checkout-cone-mode: false
+
+      - name: Dispatch the workflows whose slot has passed
+        run: >-
+          python3 .github/tick.py
+          "keeper.yml=47 * * * *"
+          "agent.yml=17 */4 * * *"
+
+      - name: Queue the next tick
+        if: success() || failure()
+        run: |
+          for attempt in 1 2 3; do
+            gh workflow run tick.yml && exit 0
+            sleep 30
+          done
+          exit 1

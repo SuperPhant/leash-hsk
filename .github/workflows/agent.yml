@@ -2,9 +2,8 @@ name: agent
 
 # The Leash trading agent on HSK Chain testnet: researches HSK, BTC and ETH and rebalances every vault delegated to it
 # on HSKSwap, inside each vault's onchain mandate. Rationale documents and status go to the `notes` branch.
+# Runs every 4 hours at :17 UTC, dispatched by tick.yml.
 on:
-  schedule:
-    - cron: "17 */4 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
