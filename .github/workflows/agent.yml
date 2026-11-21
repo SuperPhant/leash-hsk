@@ -27,6 +27,7 @@ jobs:
       LEASH_CHAIN: hskTestnet
       LEASH_NOTES_DIR: ${{ github.workspace }}/notes-out
       AGENT_KEY: ${{ secrets.AGENT_KEY }}
+      KEEPER_KEY: ${{ secrets.KEEPER_KEY }}
       LEASH_LLM_KEY: ${{ secrets.LEASH_LLM_KEY }}
       LEASH_DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
     steps:
@@ -44,6 +45,15 @@ jobs:
           cache-dependency-path: agent/package-lock.json
 
       - run: npm ci
+        working-directory: agent
+
+      # Refresh the mirrored prices, realign the testnet pools and enforce stop-losses right before trading, so every
+      # rebalance uses current prices even when the hourly keeper run is late. A keeper failure does not stop the
+      # agent: the vaults still refuse prices older than their mandate's maxOracleAge.
+      - name: Keeper pass before trading
+        if: ${{ !inputs.dry_run }}
+        continue-on-error: true
+        run: npx tsx src/keeper.ts
         working-directory: agent
 
       - run: npx tsx src/run.ts

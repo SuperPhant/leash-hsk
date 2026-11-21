@@ -68,7 +68,8 @@ change the rules in plain words; every change is a transaction you sign.
   and sends `rebalance`. Each trade's rationale (signals, baseline, LLM proposal, final weights, every place the leash
   pulled) is published to the `notes` branch and its keccak256 is committed onchain; the app re-hashes it.
 - **The keeper** (`agent/src/keeper.ts`) relays prices, realigns pools and calls `stopOut` wherever `exitStatus`
-  says a stop-loss or the breaker has triggered. It never decides trades.
+  says a stop-loss or the breaker has triggered. It never decides trades. Besides its hourly run, the agent's workflow
+  runs one keeper pass right before every agent run, so trades always use freshly mirrored prices and realigned pools.
 - **The chat** (`app/src/chat.ts`) runs in the browser with no server and no API key: it parses instructions,
   including moods ("I'm worried about a crash" → tighter stop, more cash, tighter breaker), clamps them to what the
   contract accepts, and shows the exact diff before the owner signs (`setMandate`, `setCap`, `setPaused`).
