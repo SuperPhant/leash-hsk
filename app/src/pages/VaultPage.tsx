@@ -14,6 +14,7 @@ import {
 import { helpReply, mandateChanged, propose, rulesReply, statusReply, type Proposal, type Reply } from "../chat";
 import { AddrLink, Badge, Card, Empty, LineChart, Spinner, Stat, TxLink, WeightBar } from "../ui";
 import { ago, duration, fmtPct, fmtUsd, short, useAsync } from "../util";
+import { LeashTester } from "./LeashTester";
 
 const PROFILE_NAMES: Record<string, string> = { steady: "Conservative", balanced: "Balanced", momentum: "Aggressive" };
 
@@ -580,6 +581,7 @@ export function VaultPage({ address }: { address: `0x${string}` }) {
           <Holdings v={v} />
           <NavCard v={v} />
           <RulesCard v={v} />
+          <LeashTester v={v} />
           <Activity v={v} />
           <RiskExits v={v} />
         </div>

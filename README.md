@@ -17,7 +17,7 @@ change the rules in plain words; every change is a transaction you sign.
 | An AI agent that trades on a DEX such as HSKSwap | Every trade is a swap in an HSKSwap (Uniswap V3) pool through SwapRouter02, sent by the agent's `rebalance` call to the vault. |
 | Monitor markets, analyse on-chain data, identify signals, execute autonomously | Every 4 hours the agent reads HSK Chain mainnet prices (APRO feeds, HSKSwap TWAP), HSKSwap pool depth and the APRO-vs-pool gap, plus 30-day returns, volatility and drawdown; builds a rules baseline; has an LLM review it; and trades. |
 | Spot arbitrage and spread opportunities | The desk compares each pool's spot price with its oracle before every swap; the keeper arbitrages the testnet pools back to the mainnet price every hour (it is the testnet's arbitrageur). The agent sees the mainnet APRO-vs-HSKSwap gap as a signal. |
-| Strict risk controls and stop-loss rules | Enforced by the vault, not by the agent: per-coin caps, cash floor, daily turnover, max slippage vs the oracle, oracle freshness, minimum time between trades, a **stop-loss per position** (from its volume-weighted average entry) and a **drawdown breaker** on NAV. Stop-losses are executed by a keeper, and `stopOut` is permissionless, so anyone can enforce them. |
+| Strict risk controls and stop-loss rules | Enforced by the vault, not by the agent: per-coin caps, cash floor, daily turnover, max slippage vs the oracle, oracle freshness, minimum time between trades, a **stop-loss per position** (from its volume-weighted average entry) and a **drawdown breaker** on NAV. Stop-losses are executed by a keeper, and `stopOut` is permissionless, so anyone can enforce them. Every vault page has a **Try to break the leash** panel: it simulates the agent's most dangerous moves against the vault's live state (a coin past its cap, all the cash at once, a frozen price, buying back right after a stop-loss, buying through the breaker, withdrawing to itself) and shows the contract refusing each one, next to a normal trade that goes through. |
 | A conversational interface to see positions and PnL in real time and adjust position size, trade frequency, risk appetite and target assets | Each vault page has a chat. "How am I doing?" answers with live positions, average entry, stop level and unrealised PnL. "Max 15% in HSK", "trade at most every 8 hours", "be more conservative", "stop trading ETH", "stop loss 6%", "I'm worried about a crash" become a concrete rule change the owner signs. "Why did you trade?" answers with the agent's own LLM rationale, verified against the hash it committed onchain. |
 
 ## How it works
@@ -90,7 +90,8 @@ change the rules in plain words; every change is a transaction you sign.
 3. On your vault page, talk to the agent: "how am I doing?", "max 15% in HSK", "trade at most every 8 hours",
    "stop loss 6%", then **Sign and apply**.
 4. Or just watch the three live demo vaults (Conservative, Balanced, Aggressive) and their verified rationales, and
-   check the agent's graded **Track record**.
+   check the agent's graded **Track record**. On any vault page, **Try them all** in *Try to break the leash* runs
+   the agent's worst moves against the contract without a wallet.
 
 ## Deployments
 
