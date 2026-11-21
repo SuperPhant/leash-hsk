@@ -8,6 +8,7 @@ import { VaultPage } from "./pages/VaultPage";
 import { CreatePage } from "./pages/CreatePage";
 import { AgentPage } from "./pages/AgentPage";
 import { AboutPage } from "./pages/AboutPage";
+import { RecordPage } from "./pages/RecordPage";
 
 interface WalletState {
   address?: `0x${string}`;
@@ -67,6 +68,7 @@ function Header() {
       </a>
       <nav>
         <a href="#/">Vaults</a>
+        <a href="#/record">Track record</a>
         <a href="#/agent">Agent &amp; keeper</a>
         <a href="#/create">Create vault</a>
         <a href="#/about">How it works</a>
@@ -95,6 +97,7 @@ export function App() {
   else if (route.startsWith("/vault/")) page = <VaultPage address={route.split("/")[2] as `0x${string}`} />;
   else if (route.startsWith("/create")) page = <CreatePage />;
   else if (route.startsWith("/agent")) page = <AgentPage />;
+  else if (route.startsWith("/record")) page = <RecordPage />;
   else if (route.startsWith("/about")) page = <AboutPage />;
   else page = <Home />;
   return (

@@ -72,6 +72,13 @@ change the rules in plain words; every change is a transaction you sign.
 - **The chat** (`app/src/chat.ts`) runs in the browser with no server and no API key: it parses instructions,
   including moods ("I'm worried about a crash" → tighter stop, more cash, tighter breaker), clamps them to what the
   contract accepts, and shows the exact diff before the owner signs (`setMandate`, `setCap`, `setPaused`).
+- **The track record** ([app page](https://superphant.github.io/leash-hsk/#/record), `app/src/record.ts`) grades
+  every trade 24 hours after it was made, in the visitor's browser, from HSK Chain testnet events alone: the price the
+  vault traded at (`TradeExecuted`, or `RiskExit` for a stop-loss) against the oracle price in force 24 hours later
+  (the price hub's `Relayed` rounds, timestamped on mainnet). A buy is right if the price rose, a sell if it fell;
+  "value added" is what each decision earned or saved over those 24 hours versus not trading. Each vault is also
+  compared with holding its first allocation and with staying in cash, and every rationale note is re-hashed and
+  matched to the hash in its `Rebalanced` event. No number on the page comes from our servers.
 
 ## Try it (about 3 minutes)
 
@@ -81,7 +88,8 @@ change the rules in plain words; every change is a transaction you sign.
    agent, which trades it on its next run.
 3. On your vault page, talk to the agent: "how am I doing?", "max 15% in HSK", "trade at most every 8 hours",
    "stop loss 6%", then **Sign and apply**.
-4. Or just watch the three live demo vaults (Conservative, Balanced, Aggressive) and their verified rationales.
+4. Or just watch the three live demo vaults (Conservative, Balanced, Aggressive) and their verified rationales, and
+   check the agent's graded **Track record**.
 
 ## Deployments
 
@@ -134,6 +142,8 @@ rationale notes and status to the `notes` branch.
 - Leash started as an entry for Base's Stocks Maxxing builder quest (tokenized stocks on Base, built on Nov 20–21).
   This HSK Chain version was rebuilt during the hackathon: new HSKSwap desk, stop-loss and drawdown breaker, TWAP and
   mirrored APRO price layer, pool aligner, keeper, crypto strategy and the chat.
+- The testnet pools are realigned to the mainnet price once an hour, so a trade made between two alignments can pay a
+  wider spread than it would on mainnet. The track record counts that cost; it shows up in "Trading added".
 - Built by Phant Studio with AI coding assistants (GitHub Copilot). Not investment advice.
 
 MIT licence.

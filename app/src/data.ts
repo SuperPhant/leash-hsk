@@ -1,6 +1,7 @@
 import { decodeEventLog, keccak256, parseAbiItem, toBytes } from "viem";
 import { ABI, testnet } from "./clients";
 import { CHAIN, DEP, NOTES, TICKER_BY_TOKEN } from "./config";
+import { logsInSpans } from "./logs";
 
 export interface Mandate {
   minCashBps: number;
@@ -321,28 +322,23 @@ const riskExit = parseAbiItem(
   "event RiskExit(address indexed token, uint8 reason, uint256 price, uint256 entryPrice, uint256 amountSold, uint256 usdOut, address indexed caller)",
 );
 
-/** Every stop-loss or breaker exit of a vault, read from its event logs in block chunks the public RPC accepts. */
+/** Every stop-loss or breaker exit of a vault, read from its event logs in block spans the public RPC accepts. */
 export async function loadRiskExits(vault: `0x${string}`): Promise<RiskExitEvent[]> {
-  const latest = await testnet.getBlockNumber();
-  const from = BigInt(DEP.startBlock);
-  const out: RiskExitEvent[] = [];
-  const step = 50_000n;
-  for (let start = from; start <= latest; start += step) {
-    const end = start + step - 1n > latest ? latest : start + step - 1n;
-    const logs = await testnet.getLogs({ address: vault, event: riskExit, fromBlock: start, toBlock: end });
-    for (const l of logs) {
-      const a = l.args as any;
-      out.push({
-        ticker: TICKER_BY_TOKEN.get(String(a.token).toLowerCase()) ?? "?",
-        reason: Number(a.reason) === 1 ? "stop-loss" : "drawdown breaker",
-        price: Number(a.price) / 1e8,
-        entryPrice: Number(a.entryPrice) / 1e8,
-        usdOut: Number(a.usdOut) / 1e6,
-        caller: a.caller,
-        tx: l.transactionHash!,
-        block: l.blockNumber!,
-      });
-    }
-  }
+  const logs = await logsInSpans(`risk:${vault}`, (fromBlock, toBlock) =>
+    testnet.getLogs({ address: vault, event: riskExit, fromBlock, toBlock }),
+  );
+  const out: RiskExitEvent[] = logs.map((l) => {
+    const a = l.args as any;
+    return {
+      ticker: TICKER_BY_TOKEN.get(String(a.token).toLowerCase()) ?? "?",
+      reason: Number(a.reason) === 1 ? "stop-loss" : "drawdown breaker",
+      price: Number(a.price) / 1e8,
+      entryPrice: Number(a.entryPrice) / 1e8,
+      usdOut: Number(a.usdOut) / 1e6,
+      caller: a.caller,
+      tx: l.transactionHash!,
+      block: l.blockNumber!,
+    };
+  });
   return out.reverse();
 }
