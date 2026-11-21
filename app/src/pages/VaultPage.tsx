@@ -96,7 +96,7 @@ function Holdings({ v }: { v: VaultData }) {
                   <td className="wcell">
                     <WeightBar weightBps={h.weightBps} capBps={h.capBps} />
                     <span className="small muted">
-                      {(h.weightBps / 100).toFixed(1)}% / cap {(h.capBps / 100).toFixed(0)}%
+                      {(h.weightBps / 100).toFixed(1)}% / {(h.capBps / 100).toFixed(0)}%
                     </span>
                   </td>
                   <td className="num">{h.entryPrice ? fmtUsd(h.entryPrice, d) : "–"}</td>
