@@ -1,0 +1,53 @@
+name: keeper
+
+# The keeper: mirrors HSK Chain mainnet prices (APRO feeds, HSKSwap TWAP) to the testnet, realigns the testnet HSKSwap
+# pools with them, and enforces every vault's stop-loss and drawdown breaker. Independent of the AI agent.
+on:
+  schedule:
+    - cron: "47 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leash-hsk-notes
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LEASH_CHAIN: hskTestnet
+      LEASH_NOTES_DIR: ${{ github.workspace }}/notes-out
+      KEEPER_KEY: ${{ secrets.KEEPER_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the notes branch
+        run: |
+          git fetch origin notes:notes
+          git worktree add notes-out notes
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: agent/package-lock.json
+
+      - run: npm ci
+        working-directory: agent
+
+      - run: npx tsx src/keeper.ts
+        working-directory: agent
+
+      - name: Publish keeper status
+        if: always()
+        working-directory: notes-out
+        run: |
+          git config user.name "leash-keeper[bot]"
+          git config user.email "leash-keeper[bot]@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "keeper run $(date -u +%Y-%m-%dT%H:%M:%SZ)" || exit 0
+          git push origin HEAD:notes

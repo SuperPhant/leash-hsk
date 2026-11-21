@@ -1,0 +1,63 @@
+{
+  "chainId": 133,
+  "chainName": "HSK Chain Testnet",
+  "deployedAt": "2026-11-21T06:22:20.043Z",
+  "deployer": "0x3EeE68432E42cA90b1B9500732bB958E25155AFA",
+  "agent": "0x447406ff8B4f98e4328974e26be1B92606D07f3d",
+  "keeper": "0xB53C8DF7c0ff4a3ADCCB2339E3b7a56c7b21D339",
+  "usd": "0x5a59130edc19ee24151d2e87464e053eea5cc1cd",
+  "desk": "0xf43dae5250ec6462a42e5f7a1fb2b0401685a5fb",
+  "factory": "0x353ad999ddc02f7fc0876c00c643a0386e6c0b4b",
+  "hub": "0xc8f0aebd9963f8bb2217e8c3f57659de0f2d3a9b",
+  "aligner": "0x06659271aa926a279799a513aef6c3e652b7c4cf",
+  "faucet": "0x4e60901ec6ac8dd9f6b8e6ff152d66966da44240",
+  "startBlock": "36027655",
+  "assets": [
+    {
+      "ticker": "HSK",
+      "token": "0x4b7f5d3ae4b159b8bae47ea5e7d4c9381686fb5c",
+      "feed": "0xE0A4C1D1991657a6336d082F77C4cf0e257f33D5",
+      "feedId": 0,
+      "pool": "0x435cb3e69b3c079efffDB94B0Ab97d12a3D39dfa",
+      "mainnetToken": "0xB210D2120d57b758EE163cFfb43e73728c471Cf1",
+      "mainnetPool": "0x4ff515761864e7838B0AdB8b5b2B8B7A068905dC",
+      "aproFeed": "0x86CE42c1b714149Dc3A7b17169EF67b5F78A224b"
+    },
+    {
+      "ticker": "BTC",
+      "token": "0xe82ca07081a5ddce2ec220f81156ae8a18cd14d8",
+      "feed": "0x0814d86607F0BD5942E1cdb900B5a965599310B4",
+      "feedId": 1,
+      "pool": "0xa6c3aaF23053b788cb9e8C4E29B8De1bBE27C93F",
+      "mainnetToken": "0x6119CA49a79f5825C8B345F8d7aC36B272565b14",
+      "mainnetPool": "0xd9EA2cE468957Ba49cCC38C4758Ed6ecD561449A",
+      "aproFeed": "0x204ED500ab56A2E19B051561258E3A45c850360F"
+    },
+    {
+      "ticker": "ETH",
+      "token": "0x6dbf8fe17c6cd855119945d17f6890c97d9f6d49",
+      "feed": "0xC592C58bB103b1e7c3eA62daedBAE7FD518F3BF1",
+      "feedId": 2,
+      "pool": "0xB0875232303b21B1F5f3E6D4958CBa3c3d595107",
+      "mainnetToken": "0xefd4bC9afD210517803f293ABABd701CaeeCdfd0",
+      "mainnetPool": "0xb92b79ed6b370D5cFee2E14B1D0983C258304C16"
+    }
+  ],
+  "demoVaults": [
+    {
+      "name": "Steady BTC",
+      "vault": "0xc6c761dB028dC29e18E5d487982A39800e2e14A2",
+      "profile": "steady"
+    },
+    {
+      "name": "Balanced Trio",
+      "vault": "0x9b2D36C0f4c492397AaB3F85addD1Fe68680f6b5",
+      "profile": "balanced"
+    },
+    {
+      "name": "HSK Momentum",
+      "vault": "0xd50Ce76BBB531EFE171f4d69F93Ab7C95A0fac26",
+      "profile": "momentum"
+    }
+  ]
+}

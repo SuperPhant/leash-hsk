@@ -1,0 +1,60 @@
+name: agent
+
+# The Leash trading agent on HSK Chain testnet: researches HSK, BTC and ETH and rebalances every vault delegated to it
+# on HSKSwap, inside each vault's onchain mandate. Rationale documents and status go to the `notes` branch.
+on:
+  schedule:
+    - cron: "17 */4 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Simulate rebalances without sending them
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leash-hsk-notes
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LEASH_CHAIN: hskTestnet
+      LEASH_NOTES_DIR: ${{ github.workspace }}/notes-out
+      AGENT_KEY: ${{ secrets.AGENT_KEY }}
+      LEASH_LLM_KEY: ${{ secrets.LEASH_LLM_KEY }}
+      LEASH_DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the notes branch
+        run: |
+          git fetch origin notes:notes
+          git worktree add notes-out notes
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: agent/package-lock.json
+
+      - run: npm ci
+        working-directory: agent
+
+      - run: npx tsx src/run.ts
+        working-directory: agent
+
+      - name: Publish rationale notes and status
+        if: always()
+        working-directory: notes-out
+        run: |
+          git config user.name "leash-agent[bot]"
+          git config user.email "leash-agent[bot]@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "agent run $(date -u +%Y-%m-%dT%H:%M:%SZ)" || exit 0
+          git push origin HEAD:notes
