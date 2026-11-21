@@ -146,6 +146,9 @@ trigger ran hours late for this repository.
   mirrored APRO price layer, pool aligner, keeper, crypto strategy and the chat.
 - The testnet pools are realigned to the mainnet price once an hour, so a trade made between two alignments can pay a
   wider spread than it would on mainnet. The track record counts that cost; it shows up in "Trading added".
+- On Nov 21 the hourly keeper did not run on schedule, so the trades at 06:23 and 09:10 UTC used prices relayed hours
+  earlier (BTC about 4% and ETH about 5% below the live mainnet price). Their 24-hour grades carry that error. The
+  agent now runs a keeper pass right before trading, and `tick.yml` keeps the keeper on time.
 - Built by Phant Studio with AI coding assistants (GitHub Copilot). Not investment advice.
 
 MIT licence.

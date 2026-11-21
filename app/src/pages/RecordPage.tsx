@@ -213,6 +213,12 @@ export function RecordPage() {
                 keccak256 and compares the result with the hash the vault stored onchain in its{" "}
                 <code>Rebalanced</code> event.
               </li>
+              <li>
+                <b>Known error on Nov 21:</b> the hourly keeper did not run on schedule that day, so the trades at 06:23
+                and 09:10 UTC used prices relayed hours earlier: BTC about 4% and ETH about 5% below the live mainnet
+                price. Their grades carry that error, in both directions. Since then the agent refreshes prices right
+                before every trade.
+              </li>
             </ul>
             <p className="small muted">
               Source:{" "}
