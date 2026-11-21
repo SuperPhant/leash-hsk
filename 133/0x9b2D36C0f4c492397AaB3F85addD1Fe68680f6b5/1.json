@@ -1,0 +1,159 @@
+{
+  "schema": "leash-hsk.rationale/v1",
+  "chainId": 133,
+  "vault": "0x9b2D36C0f4c492397AaB3F85addD1Fe68680f6b5",
+  "epoch": 1,
+  "agent": "0x447406ff8B4f98e4328974e26be1B92606D07f3d",
+  "createdAt": "2026-11-21T06:24:09.271Z",
+  "profile": {
+    "id": "balanced",
+    "name": "Balanced Trio",
+    "style": "Diversified across BTC, ETH and HSK, sized by inverse volatility with a moderate tilt toward the stronger recent trend. Cut a coin whose volatility spikes."
+  },
+  "mandate": {
+    "caps": {
+      "BTC": "40.0%",
+      "ETH": "35.0%",
+      "HSK": "25.0%"
+    },
+    "minCash": "15.0%",
+    "maxTurnoverPerWindow": "50% per 24h",
+    "maxSlippage": "1.2%",
+    "maxOracleAge": "30.0h",
+    "tradeEvery": "4h at most",
+    "stopLoss": "12% below average entry",
+    "drawdownBreaker": "20% below high-water mark",
+    "expiry": "2027-11-21T06:22:08.000Z"
+  },
+  "risk": {
+    "nav": "$100,000",
+    "pnl": "+$0",
+    "drawdownFromPeak": "0%",
+    "breakerTripped": false,
+    "reentryBlocked": []
+  },
+  "market": {
+    "asOf": "2026-11-21T06:23:06.000Z",
+    "source": "HSK Chain mainnet: APRO HSK/USD and BTC/USD feeds, HSKSwap WETH/USDT 30-min TWAP (mirrored to testnet by the keeper); HSKSwap pool depth; CoinGecko daily closes",
+    "signals": [
+      {
+        "ticker": "HSK",
+        "price": 0.08042273,
+        "updatedAt": 1795213739,
+        "ageHours": 7.901944444444444,
+        "stale": false,
+        "ret1d": -0.0033944417965494633,
+        "ret7d": -0.0457884142135625,
+        "ret30d": -0.06905516963086789,
+        "vol30d": 0.19908920591822887,
+        "maxDrawdown30d": -0.0990584571596076,
+        "mainnetPoolTwap": 0.0813437,
+        "mainnetPoolUsdtDepth": 420975.531918,
+        "aproVsPoolBps": 115,
+        "closes": 32,
+        "historySource": "coingecko daily"
+      },
+      {
+        "ticker": "BTC",
+        "price": 55778.00094006,
+        "updatedAt": 1795234053,
+        "ageHours": 2.2591666666666668,
+        "stale": false,
+        "ret1d": -0.05168364281184168,
+        "ret7d": -0.13010300553413978,
+        "ret30d": -0.31416166730167594,
+        "vol30d": 0.47149647398657635,
+        "maxDrawdown30d": -0.31416166730167594,
+        "mainnetPoolTwap": 56508.89521127,
+        "mainnetPoolUsdtDepth": 43351.519256,
+        "aproVsPoolBps": 131,
+        "closes": 32,
+        "historySource": "coingecko daily"
+      },
+      {
+        "ticker": "ETH",
+        "price": 1549.26417798,
+        "updatedAt": 1795241996,
+        "ageHours": 0.05277777777777778,
+        "stale": false,
+        "ret1d": -0.04337446096121633,
+        "ret7d": -0.12394333038910987,
+        "ret30d": -0.3508169468086172,
+        "vol30d": 0.6374968164052163,
+        "maxDrawdown30d": -0.3606224452591651,
+        "mainnetPoolTwap": 1549.26417798,
+        "mainnetPoolUsdtDepth": 39885.015743,
+        "aproVsPoolBps": null,
+        "closes": 32,
+        "historySource": "coingecko daily"
+      }
+    ]
+  },
+  "decision": {
+    "source": "llm:gpt-oss-20b",
+    "summary": "Adjusted to 25% HSK, 40% BTC, 20% ETH, keeping 15% cash. Reduced exposure to ETH due to high volatility and downtrend, increased BTC within cap, capped HSK at 25%.",
+    "perAsset": {
+      "HSK": "Capped at 25% due to cap and moderate trend.",
+      "BTC": "Maxed at 40% cap, offsetting downtrend with higher allocation.",
+      "ETH": "Reduced to 20% to mitigate high volatility and downtrend."
+    },
+    "risks": [
+      "High BTC volatility may trigger stop‑loss.",
+      "ETH remains exposed to significant drawdown risk.",
+      "Cash floor at 15% may limit upside in a rally."
+    ],
+    "current": {
+      "BTC": "0.0%",
+      "ETH": "0.0%",
+      "HSK": "0.0%"
+    },
+    "baseline": {
+      "BTC": "23.5%",
+      "ETH": "17.4%",
+      "HSK": "24.7%"
+    },
+    "proposed": {
+      "HSK": "25.0%",
+      "BTC": "40.0%",
+      "ETH": "20.0%"
+    },
+    "final": {
+      "BTC": "26.7%",
+      "ETH": "20.1%",
+      "HSK": "24.7%"
+    },
+    "frozen": []
+  },
+  "leashCorrections": [
+    "BTC: model proposed 40.0%; it may add at most 3.0% to the rules baseline 23.5% -> 26.5%",
+    "HSK: 25.0% exceeds cap 25.0%, clipped",
+    "turnover budget $48,500 < desired $71,545.8: trades scaled to 67.8%"
+  ],
+  "trades": [
+    {
+      "ticker": "BTC",
+      "side": "buy",
+      "venue": "HSKSwap (Uniswap V3) 0.3% pool",
+      "amountIn": "18111039190",
+      "minAmountOut": "32080221",
+      "notionalUsd": 18111.03919
+    },
+    {
+      "ticker": "ETH",
+      "side": "buy",
+      "venue": "HSKSwap (Uniswap V3) 0.3% pool",
+      "amountIn": "13645119634",
+      "minAmountOut": "8701794303389641714",
+      "notionalUsd": 13645.119634
+    },
+    {
+      "ticker": "HSK",
+      "side": "buy",
+      "venue": "HSKSwap (Uniswap V3) 0.3% pool",
+      "amountIn": "16743808900",
+      "minAmountOut": "205699100157380879758744",
+      "notionalUsd": 16743.8089
+    }
+  ],
+  "disclaimer": "Testnet demonstration on mirrored HSK Chain mainnet prices. Not investment advice."
+}
