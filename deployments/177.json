@@ -1,0 +1,47 @@
+{
+  "chainId": 177,
+  "chainName": "HSK Chain",
+  "deployedAt": "2026-11-22T09:29:23.249Z",
+  "deployer": "0x3EeE68432E42cA90b1B9500732bB958E25155AFA",
+  "agent": "0x1867b82dc712242cF301Ea53D58d1F4A1558E418",
+  "keeper": "0x1867b82dc712242cF301Ea53D58d1F4A1558E418",
+  "usd": "0xF1B50eD67A9e2CC94Ad3c477779E2d4cBfFf9029",
+  "desk": "0x5a59130edc19ee24151d2e87464e053eea5cc1cd",
+  "factory": "0xaae1642d99d83a3cd6e05b0c14fd2d5fa2b6f1a9",
+  "startBlock": "30496295",
+  "assets": [
+    {
+      "ticker": "HSK",
+      "token": "0xB210D2120d57b758EE163cFfb43e73728c471Cf1",
+      "feed": "0x4b7f5d3ae4b159b8bae47ea5e7d4c9381686fb5c",
+      "pool": "0x4ff515761864e7838B0AdB8b5b2B8B7A068905dC",
+      "mainnetToken": "0xB210D2120d57b758EE163cFfb43e73728c471Cf1",
+      "mainnetPool": "0x4ff515761864e7838B0AdB8b5b2B8B7A068905dC",
+      "aproFeed": "0x86CE42c1b714149Dc3A7b17169EF67b5F78A224b"
+    },
+    {
+      "ticker": "BTC",
+      "token": "0x6119CA49a79f5825C8B345F8d7aC36B272565b14",
+      "feed": "0x6dbf8fe17c6cd855119945d17f6890c97d9f6d49",
+      "pool": "0xd9EA2cE468957Ba49cCC38C4758Ed6ecD561449A",
+      "mainnetToken": "0x6119CA49a79f5825C8B345F8d7aC36B272565b14",
+      "mainnetPool": "0xd9EA2cE468957Ba49cCC38C4758Ed6ecD561449A",
+      "aproFeed": "0x204ED500ab56A2E19B051561258E3A45c850360F"
+    },
+    {
+      "ticker": "ETH",
+      "token": "0xefd4bC9afD210517803f293ABABd701CaeeCdfd0",
+      "feed": "0xb2000190e64472578299a06210c4939310400d62",
+      "pool": "0xb92b79ed6b370D5cFee2E14B1D0983C258304C16",
+      "mainnetToken": "0xefd4bC9afD210517803f293ABABd701CaeeCdfd0",
+      "mainnetPool": "0xb92b79ed6b370D5cFee2E14B1D0983C258304C16"
+    }
+  ],
+  "demoVaults": [
+    {
+      "name": "Leash Mainnet",
+      "vault": "0xa813772199915f36e74d636db7D7cFB2ED36D7DB",
+      "profile": "balanced"
+    }
+  ]
+}

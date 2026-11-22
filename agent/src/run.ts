@@ -14,7 +14,7 @@ import { PROFILES, type Profile } from "./profiles.js";
 
 const chain = targetChain();
 const dep = loadDeployment(chain.id);
-const { pub, wallet, account } = clients(chain, loadKey("AGENT_KEY", "testnet-agent"));
+const { pub, wallet, account } = clients(chain, loadKey("AGENT_KEY", chain.testnet ? "testnet-agent" : "hsk-mainnet-agent"));
 const notesDir = process.env.LEASH_NOTES_DIR ?? join(ROOT, "notes-out");
 const dryRun = process.env.LEASH_DRY_RUN === "1";
 const vaultAbi = abi("LeashVault");

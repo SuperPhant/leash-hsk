@@ -39,6 +39,7 @@ jobs:
           python3 .github/tick.py
           "keeper.yml=47 * * * *"
           "agent.yml=17 */4 * * *"
+          "agent-mainnet.yml=29 14 * * *"
 
       - name: Queue the next tick
         if: success() || failure()

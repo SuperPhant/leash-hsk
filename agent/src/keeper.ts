@@ -208,7 +208,7 @@ function recordHistory(notesDir: string, quotes: MainnetQuote[]) {
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const chain = targetChain();
   const dep = loadDeployment(chain.id);
-  const { pub, wallet, account } = clients(chain, loadKey("KEEPER_KEY", "testnet-leash-keeper"));
+  const { pub, wallet, account } = clients(chain, loadKey("KEEPER_KEY", chain.testnet ? "testnet-leash-keeper" : "hsk-mainnet-agent"));
   const notesDir = process.env.LEASH_NOTES_DIR ?? join(ROOT, "notes-out");
   const out: Record<string, unknown> = { at: new Date().toISOString(), keeper: account.address };
   let failed = false;

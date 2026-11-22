@@ -1,0 +1,68 @@
+name: agent-mainnet
+
+# The Leash agent on HSK Chain mainnet: one cycle a day for the live vault in deployments/177.json, trading the real
+# HSKSwap pools inside the vault's onchain mandate. A keeper pass first sweeps any position whose stop-loss or
+# drawdown breaker has triggered (stopOut is permissionless; on mainnet there are no prices to relay or pools to
+# realign). The agent key holds only a few HSK for gas. Rationale notes and status go to the `notes` branch under 177/.
+# Runs daily at 14:29 UTC, dispatched by tick.yml.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Simulate rebalances without sending them
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leash-hsk-notes
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LEASH_CHAIN: hskMainnet
+      LEASH_NOTES_DIR: ${{ github.workspace }}/notes-out
+      AGENT_KEY: ${{ secrets.MAINNET_AGENT_KEY }}
+      KEEPER_KEY: ${{ secrets.MAINNET_AGENT_KEY }}
+      LEASH_LLM_KEY: ${{ secrets.LEASH_LLM_KEY }}
+      LEASH_DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out the notes branch
+        run: |
+          git fetch origin notes:notes
+          git worktree add notes-out notes
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: agent/package-lock.json
+
+      - run: npm ci
+        working-directory: agent
+
+      - name: Stop-loss sweep before trading
+        if: ${{ !inputs.dry_run }}
+        continue-on-error: true
+        run: npx tsx src/keeper.ts
+        working-directory: agent
+
+      - run: npx tsx src/run.ts
+        working-directory: agent
+
+      - name: Publish rationale notes and status
+        if: always()
+        working-directory: notes-out
+        run: |
+          git config user.name "leash-agent[bot]"
+          git config user.email "leash-agent[bot]@users.noreply.github.com"
+          git add -A
+          git commit --quiet -m "mainnet agent run $(date -u +%Y-%m-%dT%H:%M:%SZ)" || exit 0
+          git push origin HEAD:notes
