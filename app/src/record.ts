@@ -1,4 +1,4 @@
-import { parseAbiItem } from "viem";
+import { parseAbi, parseAbiItem } from "viem";
 import { testnet } from "./clients";
 import { DEP, TICKER_BY_TOKEN } from "./config";
 import { loadMarket, loadNote, loadVault, loadVaultList } from "./data";
@@ -6,10 +6,14 @@ import { logsInSpans } from "./logs";
 
 /** Every trade is graded on the oracle price this long after it was made. */
 export const HORIZON = 24 * 3600;
-/** Extra wait before grading, so the hourly keeper has relayed every round dated before the horizon. */
-export const SETTLE = 3600;
+/** Extra wait before grading, so the hourly keeper has relayed every round dated before the horizon (testnet only). */
+export const SETTLE = DEP.hub ? 3600 : 0;
 /** Price moves smaller than this count as flat: neither right nor wrong. */
 export const FLAT = 0.0005;
+/** HSK Chain makes a block every 2 seconds. */
+const BLOCK_SECONDS = 2;
+
+const feedAbi = parseAbi(["function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)"]);
 
 const tradeExecuted = parseAbiItem(
   "event TradeExecuted(uint256 indexed epoch, address indexed token, bool buy, uint256 amountIn, uint256 amountOut, uint256 oraclePrice, uint256 notional)",
@@ -113,6 +117,23 @@ export function priceAt(rounds: Array<{ at: number; price: number }>, t: number)
   return found;
 }
 
+/**
+ * On mainnet the vault's oracle is a TWAP feed computed at every call, so the price HORIZON after a trade is that
+ * feed read at the block HORIZON later (the HSK Chain RPC serves historical state).
+ */
+async function feedPriceAt(ticker: string, block: bigint) {
+  const feed = DEP.assets.find((a) => a.ticker === ticker)?.feed;
+  if (!feed) return undefined;
+  const r = (await testnet.readContract({ address: feed, abi: feedAbi, functionName: "latestRoundData", blockNumber: block })) as readonly [
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+  ];
+  return { at: Number(r[3]), price: Number(r[1]) / 1e8 };
+}
+
 /** A buy is right if the price then rose, a sell (stop-loss exits included) if it fell. */
 export function grade(side: "buy" | "sell", notional: number, price0: number, price24: number) {
   const move = price24 / price0 - 1;
@@ -121,7 +142,7 @@ export function grade(side: "buy" | "sell", notional: number, price0: number, pr
   return { move, verdict, valueAdded: notional * signed };
 }
 
-/** Grades every trade of every vault from HSK Chain testnet events alone. */
+/** Grades every trade of every vault from chain data alone: testnet events and the price hub, or mainnet feeds. */
 export async function loadRecord(): Promise<RecordData> {
   const now = Math.floor(Date.now() / 1000);
   const vaults = await loadVaultList();
@@ -213,7 +234,10 @@ export async function loadRecord(): Promise<RecordData> {
       }
     }
     if (now < t.gradesAt) continue;
-    const r24 = priceAt(rounds.get(t.ticker) ?? [], t.t0 + HORIZON);
+    const r24 = DEP.hub
+      ? priceAt(rounds.get(t.ticker) ?? [], t.t0 + HORIZON)
+      : await feedPriceAt(t.ticker, t.block + BigInt(HORIZON / BLOCK_SECONDS)).catch(() => undefined);
+    if (!r24 && !DEP.hub) continue; // the historical read failed: leave the trade pending rather than misgrade it
     const p24 = r24?.price ?? t.price0;
     const g = grade(t.side, t.notional, t.price0, p24);
     Object.assign(t, { price24: p24, roundAt: r24?.at, move: g.move, verdict: g.verdict, valueAdded: g.valueAdded });

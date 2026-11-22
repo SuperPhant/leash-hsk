@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { BaseError, ContractFunctionRevertedError, parseUnits } from "viem";
 import { useWallet } from "../App";
 import { ABI, send, testnet } from "../clients";
-import { DEP } from "../config";
+import { DEP, IS_MAINNET } from "../config";
 import {
   loadIndex,
   loadNote,
@@ -59,6 +59,13 @@ export function explainRevert(e: unknown): string {
   return (e as Error)?.message ?? String(e);
 }
 
+/** Amounts worth at least half a cent but too small for `maxFrac` decimals (the mainnet vault holds a few cents of BTC)
+ *  keep 3 significant digits; dust left after a sale still shows as 0. */
+const fmtAmount = (x: number, maxFrac: number, usd: number) =>
+  usd >= 0.005 && x < 10 ** (1 - maxFrac)
+    ? x.toLocaleString("en-US", { maximumSignificantDigits: 3 })
+    : x.toLocaleString("en-US", { maximumFractionDigits: maxFrac });
+
 function Holdings({ v }: { v: VaultData }) {
   const now = Date.now() / 1000;
   return (
@@ -92,7 +99,7 @@ function Holdings({ v }: { v: VaultData }) {
                     )}
                     {h.capBps === 0 && <div><Badge tone="neutral">sell-only</Badge></div>}
                   </td>
-                  <td className="num">{h.amount.toLocaleString("en-US", { maximumFractionDigits: h.ticker === "BTC" ? 5 : 2 })}</td>
+                  <td className="num">{fmtAmount(h.amount, h.ticker === "BTC" ? 5 : 2, h.value)}</td>
                   <td className="num">{fmtUsd(h.value, 0)}</td>
                   <td className="wcell">
                     <WeightBar weightBps={h.weightBps} capBps={h.capBps} />
@@ -110,7 +117,7 @@ function Holdings({ v }: { v: VaultData }) {
               <td>
                 <b>USDT</b> <span className="muted small">cash</span>
               </td>
-              <td className="num">{v.cash.toLocaleString("en-US", { maximumFractionDigits: 0 })}</td>
+              <td className="num">{fmtAmount(v.cash, 0, v.cash)}</td>
               <td className="num">{fmtUsd(v.cash, 0)}</td>
               <td className="wcell">
                 <WeightBar weightBps={v.nav ? (v.cash / v.nav) * 10_000 : 0} capBps={0} cash />
@@ -587,7 +594,8 @@ export function VaultPage({ address }: { address: `0x${string}` }) {
         </div>
         <div className="col side">
           <ChatPanel v={v} reload={reload} />
-          <OwnerPanel v={v} reload={reload} />
+          {/* The app never asks visitors to put real money in: deposits and owner controls are testnet-only. */}
+          {!IS_MAINNET && <OwnerPanel v={v} reload={reload} />}
         </div>
       </div>
     </div>

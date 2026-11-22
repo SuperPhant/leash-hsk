@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BaseError, decodeErrorResult, encodeAbiParameters, encodeFunctionData, keccak256, toHex, zeroHash, type Abi } from "viem";
 import { ABI, testnet } from "../clients";
+import { IS_MAINNET } from "../config";
 import type { VaultData } from "../data";
 import { Card, Spinner } from "../ui";
 import { fmtBps, fmtUsd, short } from "../util";
@@ -105,7 +106,8 @@ function scenarios(v: VaultData): Scenario[] {
 
   const normal = priced.filter((h) => h.weightBps < h.capBps - 200);
   const small = Math.min(50, spare, budget * 0.5);
-  if (normal.length && small >= 5) {
+  // The mainnet vault holds about a dollar, so its scenarios use cents.
+  if (normal.length && small >= (IS_MAINNET ? 0.05 : 5)) {
     const h = normal[0];
     list.push({
       id: "normal",
@@ -128,7 +130,7 @@ function scenarios(v: VaultData): Scenario[] {
     });
   }
 
-  if (priced.length && v.cash > 1) {
+  if (priced.length && v.cash > (IS_MAINNET ? 0.05 : 1)) {
     const each = (v.cash * 0.99) / priced.length;
     list.push({
       id: "allin",
@@ -139,7 +141,8 @@ function scenarios(v: VaultData): Scenario[] {
   }
 
   const target = priced[0];
-  if (target) {
+  // A mainnet TwapFeed computes its price at every call, so it cannot go stale and this move does not apply there.
+  if (target && !IS_MAINNET) {
     const shift = m.maxOracleAge + 2 * 3600;
     list.push({
       id: "stale",
@@ -199,8 +202,9 @@ export function LeashTester({ v }: { v: VaultData }) {
       }
     >
       <p className="muted small">
-        Each move is simulated as the agent with <code>eth_call</code> against this vault&apos;s live state on HSK Chain
-        testnet: no wallet, no gas, nothing is sent. The cooldown is skipped so each rule shows on its own.
+        Each move is simulated as the agent with <code>eth_call</code> against this vault&apos;s live state on HSK Chain{" "}
+        {IS_MAINNET ? "mainnet" : "testnet"}: no wallet, no gas, nothing is sent. The cooldown is skipped so each rule
+        shows on its own.
       </p>
       <div className="tester">
         {list.map((s) => {

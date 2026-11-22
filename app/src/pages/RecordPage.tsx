@@ -1,4 +1,4 @@
-import { EXPLORER } from "../config";
+import { EXPLORER, IS_MAINNET } from "../config";
 import { FLAT, HORIZON, loadRecord, type GradedTrade, type Verdict } from "../record";
 import { Badge, Card, Empty, Spinner, Stat, TxLink } from "../ui";
 import { fmtPct, fmtUsd, short, useAsync } from "../util";
@@ -43,8 +43,8 @@ export function RecordPage() {
       <p className="lead">
         Every trade the agent made, and every stop-loss its vaults executed, graded {HORIZON / 3600} hours later against
         the vault&apos;s own oracle. A buy is right if the price then rose; a sell is right if it fell. This page computes
-        everything in your browser from HSK Chain testnet events; nothing comes from our servers, so anyone can check
-        it.
+        everything in your browser from HSK Chain {IS_MAINNET ? "mainnet" : "testnet"} events; nothing comes from our
+        servers, so anyone can check it.
       </p>
       {error && <div className="err small">{error}</div>}
       {!data && !error && <Spinner />}
@@ -193,13 +193,23 @@ export function RecordPage() {
                 <b>Price then:</b> the oracle price the vault traded at, from its <code>TradeExecuted</code> event (or
                 its <code>RiskExit</code> event for a stop-loss or breaker exit).
               </li>
-              <li>
-                <b>{HORIZON / 3600} h later:</b> the oracle price in force {HORIZON / 3600} hours after the trade: the
-                latest round the keeper relayed to the price hub whose HSK Chain mainnet timestamp is at or before that
-                moment, from the hub&apos;s <code>Relayed</code> events. BTC and HSK follow APRO&apos;s mainnet feeds;
-                ETH follows the mainnet HSKSwap 30-minute TWAP. A trade is graded one hour after its{" "}
-                {HORIZON / 3600} hours are up, once the keeper has relayed every round dated before then.
-              </li>
+              {IS_MAINNET ? (
+                <li>
+                  <b>{HORIZON / 3600} h later:</b> the vault&apos;s oracle read {HORIZON / 3600} hours after the trade.
+                  On mainnet each coin&apos;s oracle is a <code>TwapFeed</code> that computes the HSKSwap pool&apos;s
+                  30-minute TWAP whenever it is called, so your browser calls its <code>latestRoundData</code> at the
+                  block {HORIZON / 3600} hours after the trade (HSK Chain makes a block every 2 seconds and its RPC
+                  serves historical state).
+                </li>
+              ) : (
+                <li>
+                  <b>{HORIZON / 3600} h later:</b> the oracle price in force {HORIZON / 3600} hours after the trade: the
+                  latest round the keeper relayed to the price hub whose HSK Chain mainnet timestamp is at or before that
+                  moment, from the hub&apos;s <code>Relayed</code> events. BTC and HSK follow APRO&apos;s mainnet feeds;
+                  ETH follows the mainnet HSKSwap 30-minute TWAP. A trade is graded one hour after its{" "}
+                  {HORIZON / 3600} hours are up, once the keeper has relayed every round dated before then.
+                </li>
+              )}
               <li>
                 <b>Verdict:</b> a buy is right if the price rose, a sell if it fell. Moves under{" "}
                 {(FLAT * 100).toFixed(2)}% are flat and count neither way.
@@ -213,19 +223,24 @@ export function RecordPage() {
                 keccak256 and compares the result with the hash the vault stored onchain in its{" "}
                 <code>Rebalanced</code> event.
               </li>
-              <li>
-                <b>Known error on Nov 21:</b> the hourly keeper did not run on schedule that day, so the trades at 06:23
-                and 09:10 UTC used prices relayed hours earlier: BTC about 4% and ETH about 5% below the live mainnet
-                price. Their grades carry that error, in both directions. Since then the agent refreshes prices right
-                before every trade.
-              </li>
+              {!IS_MAINNET && (
+                <li>
+                  <b>Known error on Nov 21:</b> the hourly keeper did not run on schedule that day, so the trades at 06:23
+                  and 09:10 UTC used prices relayed hours earlier: BTC about 4% and ETH about 5% below the live mainnet
+                  price. Their grades carry that error, in both directions. Since then the agent refreshes prices right
+                  before every trade.
+                </li>
+              )}
             </ul>
             <p className="small muted">
               Source:{" "}
               <a href={`${EXPLORER}/address/${data.vaults[0]?.vault ?? ""}`} target="_blank" rel="noreferrer">
                 vault events
               </a>{" "}
-              and the price hub&apos;s events on HSK Chain testnet, read live. Computed {new Date(data.asOf * 1000).toLocaleString()}.
+              {IS_MAINNET
+                ? "and the TwapFeed oracles on HSK Chain mainnet, read live."
+                : "and the price hub's events on HSK Chain testnet, read live."}{" "}
+              Computed {new Date(data.asOf * 1000).toLocaleString()}.
             </p>
           </Card>
         </>

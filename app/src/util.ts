@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 
-export const fmtUsd = (x: number, digits = 2) =>
-  `$${x.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
+/** Whole-dollar amounts under $10 keep their cents, so the small mainnet vault does not read as $0 or $1. */
+export const fmtUsd = (x: number, digits = 2) => {
+  const d = digits === 0 && x !== 0 && Math.abs(x) < 10 ? 2 : digits;
+  return `$${x.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d })}`;
+};
 export const fmtPct = (x: number | null | undefined, digits = 1) =>
   x === null || x === undefined || !Number.isFinite(x) ? "–" : `${(x * 100).toFixed(digits)}%`;
 export const fmtBps = (bps: number, digits = 1) => `${(bps / 100).toFixed(digits)}%`;

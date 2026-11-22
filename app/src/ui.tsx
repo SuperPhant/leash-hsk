@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { EXPLORER, MAINNET_EXPLORER } from "./config";
+import { EXPLORER, MAINNET_EXPLORER, TESTNET_EXPLORER } from "./config";
 import { short } from "./util";
 
 export function Card({ title, extra, children, className = "" }: { title?: ReactNode; extra?: ReactNode; children: ReactNode; className?: string }) {
@@ -55,9 +55,11 @@ export function TxLink({ hash, label }: { hash: string; label?: string }) {
   );
 }
 
-export function AddrLink({ address, label, mainnet = false }: { address: string; label?: string; mainnet?: boolean }) {
+/** Links to the explorer of the network the app shows; `mainnet` picks one explicitly (true: mainnet, false: testnet). */
+export function AddrLink({ address, label, mainnet }: { address: string; label?: string; mainnet?: boolean }) {
+  const base = mainnet === undefined ? EXPLORER : mainnet ? MAINNET_EXPLORER : TESTNET_EXPLORER;
   return (
-    <a className="mono" href={`${mainnet ? MAINNET_EXPLORER : EXPLORER}/address/${address}`} target="_blank" rel="noreferrer">
+    <a className="mono" href={`${base}/address/${address}`} target="_blank" rel="noreferrer">
       {label ?? short(address)}
     </a>
   );
@@ -77,7 +79,7 @@ export function LineChart({ points, height = 150 }: { points: Array<[number, num
   const x1 = Math.max(...xs);
   const mid = (Math.min(...ys) + Math.max(...ys)) / 2;
   // Never zoom in closer than ±1% of NAV, so spread costs do not look like a crash.
-  const half = Math.max((Math.max(...ys) - Math.min(...ys)) * 0.65, Math.abs(mid) * 0.01, 1);
+  const half = Math.max((Math.max(...ys) - Math.min(...ys)) * 0.65, Math.abs(mid) * 0.01, 0.01);
   const lo = mid - half;
   const hi = mid + half;
   const sx = (x: number) => ((x - x0) / Math.max(1, x1 - x0)) * (w - 8) + 4;
@@ -87,7 +89,7 @@ export function LineChart({ points, height = 150 }: { points: Array<[number, num
   const last = ys[ys.length - 1];
   const up = last >= first;
   const chg = first ? (last / first - 1) * 100 : 0;
-  const money = (v: number) => `$${v.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  const money = (v: number) => `$${v.toLocaleString("en-US", { maximumFractionDigits: hi < 10 ? 2 : 0 })}`;
   return (
     <div className="chart-wrap">
       <div className="chart-meta small">

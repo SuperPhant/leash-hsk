@@ -1,4 +1,4 @@
-import { DEP, REPO } from "../config";
+import { DEP, IS_MAINNET, REPO } from "../config";
 import { loadKeeper, loadStatus } from "../data";
 import { AddrLink, Badge, Card, Empty, Spinner, TxLink } from "../ui";
 import { fmtPct, fmtUsd, short, useAsync } from "../util";
@@ -11,11 +11,20 @@ export function AgentPage() {
   return (
     <div className="page">
       <h1>Agent and keeper</h1>
-      <p className="lead">
-        Two bots run on GitHub Actions. The <b>agent</b> (every 4 hours) researches and trades the vaults delegated to it.
-        The <b>keeper</b> (every hour) mirrors HSK Chain mainnet prices to the testnet, realigns the testnet HSKSwap pools,
-        and executes any stop-loss or drawdown exit. The keeper never decides trades and the agent cannot skip the risk rules.
-      </p>
+      {IS_MAINNET ? (
+        <p className="lead">
+          On HSK Chain mainnet one GitHub Actions job runs once a day. Its <b>keeper pass</b> first sells any position
+          whose stop-loss or drawdown breaker has triggered (anyone may call <code>stopOut</code>); then the <b>agent</b>{" "}
+          researches and trades the live vault through the real HSKSwap pools. There are no prices to mirror or pools to
+          realign on mainnet: the vault's oracle is a 30-minute TWAP read from the pool itself.
+        </p>
+      ) : (
+        <p className="lead">
+          Two bots run on GitHub Actions. The <b>agent</b> (every 4 hours) researches and trades the vaults delegated to it.
+          The <b>keeper</b> (every hour) mirrors HSK Chain mainnet prices to the testnet, realigns the testnet HSKSwap pools,
+          and executes any stop-loss or drawdown exit. The keeper never decides trades and the agent cannot skip the risk rules.
+        </p>
+      )}
       <div className="grid2">
         <Card title="Trading agent" extra={<AddrLink address={DEP.agent} />}>
           {error && <div className="err small">{error}</div>}
@@ -37,7 +46,9 @@ export function AgentPage() {
                     {run.vaults.map((x) => (
                       <tr key={x.vault}>
                         <td>
-                          <a href={`#/vault/${x.vault}`}>{x.name || short(x.vault)}</a>
+                          <a href={`#/vault/${x.vault}`}>
+                            {DEP.demoVaults.find((d) => d.vault.toLowerCase() === x.vault.toLowerCase())?.name || x.name || short(x.vault)}
+                          </a>
                         </td>
                         <td className="small">
                           <Badge tone={x.status === "rebalanced" ? "ok" : x.status === "error" || x.status === "blocked" ? "bad" : "neutral"}>{x.status}</Badge>{" "}
@@ -65,7 +76,7 @@ export function AgentPage() {
                       <th>Coin</th>
                       <th className="num">Mainnet price</th>
                       <th className="num">Mainnet HSKSwap TWAP</th>
-                      <th className="num">Testnet pool gap</th>
+                      <th className="num">{IS_MAINNET ? "HSKSwap pool (spot)" : "Testnet pool gap"}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -79,7 +90,7 @@ export function AgentPage() {
                           </td>
                           <td className="num">{fmtUsd(m.price, d)}</td>
                           <td className="num">{fmtUsd(m.poolTwap, d)}</td>
-                          <td className="num">{g ? `${(g.gapBps / 100).toFixed(2)}%` : "–"}</td>
+                          <td className="num">{IS_MAINNET ? fmtUsd(m.poolSpot, d) : g ? `${(g.gapBps / 100).toFixed(2)}%` : "–"}</td>
                         </tr>
                       );
                     })}
@@ -87,8 +98,12 @@ export function AgentPage() {
                 </table>
               </div>
               <p className="small">
-                Relayed: {k.relay?.relayed?.length ? k.relay.relayed.map((r) => r.ticker).join(", ") : "nothing new"}{" "}
-                {k.relay?.tx && <TxLink hash={k.relay.tx} />} · pools moved: {k.align?.moved ?? 0} {k.align?.tx && <TxLink hash={k.align.tx} />} ·
+                {!IS_MAINNET && (
+                  <>
+                    Relayed: {k.relay?.relayed?.length ? k.relay.relayed.map((r) => r.ticker).join(", ") : "nothing new"}{" "}
+                    {k.relay?.tx && <TxLink hash={k.relay.tx} />} · pools moved: {k.align?.moved ?? 0} {k.align?.tx && <TxLink hash={k.align.tx} />} ·{" "}
+                  </>
+                )}
                 positions checked: {k.sweep?.checked ?? 0}, exits: {k.sweep?.exits?.length ?? 0}
               </p>
               {(k.relay?.error || k.align?.error || k.sweep?.error) && (

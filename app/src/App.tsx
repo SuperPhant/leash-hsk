@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { WalletClient } from "viem";
 import { connectWallet, injected } from "./clients";
-import { CHAIN, DEP, REPO } from "./config";
+import { DEP, IS_MAINNET, MAINNET_DEP, NET, REPO, switchNet, type Net } from "./config";
 import { short } from "./util";
 import { Home } from "./pages/Home";
 import { VaultPage } from "./pages/VaultPage";
@@ -77,7 +77,10 @@ function Header() {
         </a>
       </nav>
       <div className="wallet">
-        <span className="chip net">{CHAIN.name}</span>
+        <select className="chip net" value={NET} onChange={(e) => switchNet(e.target.value as Net)} title="Network shown">
+          <option value="testnet">HSK Chain Testnet</option>
+          {MAINNET_DEP && <option value="mainnet">HSK Chain Mainnet</option>}
+        </select>
         {address ? (
           <span className="chip addr">{short(address)}</span>
         ) : (
@@ -105,11 +108,18 @@ export function App() {
       <Header />
       <main>{page}</main>
       <footer className="footer">
-        <p>
-          Leash for HSK Chain is a testnet demonstration built for the HSK Chain Horizon Hackathon. Test tokens and
-          testnet HSKSwap pools follow HSK Chain mainnet prices (APRO feeds and HSKSwap TWAP); they have no value. Not
-          investment advice.
-        </p>
+        {IS_MAINNET ? (
+          <p>
+            This is Leash on HSK Chain mainnet: one small live vault (about a dollar of USDT) traded by the Leash agent
+            through the real HSKSwap pools, under the same contracts as the testnet demo. Not investment advice.
+          </p>
+        ) : (
+          <p>
+            Leash for HSK Chain is a testnet demonstration built for the HSK Chain Horizon Hackathon. Test tokens and
+            testnet HSKSwap pools follow HSK Chain mainnet prices (APRO feeds and HSKSwap TWAP); they have no value. Not
+            investment advice.
+          </p>
+        )}
         <p>
           Built by Phant Studio with AI-assisted development tools (GitHub Copilot) · <a href={REPO}>source (MIT)</a>
         </p>

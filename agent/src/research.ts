@@ -42,17 +42,23 @@ function stdev(xs: number[]): number {
 }
 
 async function coingeckoCloses(id: string): Promise<number[] | null> {
-  try {
-    const r = await fetch(`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=31&interval=daily`, {
-      headers: { accept: "application/json" },
-    });
-    if (!r.ok) return null;
-    const j = (await r.json()) as { prices?: Array<[number, number]> };
-    const closes = (j.prices ?? []).map((p) => p[1]).filter((x) => Number.isFinite(x) && x > 0);
-    return closes.length >= 8 ? closes : null;
-  } catch {
-    return null;
+  // The free API often rate-limits shared CI addresses for a few seconds; a short wait usually clears it.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 15_000 * attempt));
+    try {
+      const r = await fetch(`https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=31&interval=daily`, {
+        headers: { accept: "application/json" },
+      });
+      if (r.status === 429 || r.status >= 500) continue;
+      if (!r.ok) return null;
+      const j = (await r.json()) as { prices?: Array<[number, number]> };
+      const closes = (j.prices ?? []).map((p) => p[1]).filter((x) => Number.isFinite(x) && x > 0);
+      return closes.length >= 8 ? closes : null;
+    } catch {
+      // network error: try again
+    }
   }
+  return null;
 }
 
 /** Daily closes from the keeper's hourly mainnet history (last observation of each UTC day). */

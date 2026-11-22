@@ -1,4 +1,4 @@
-import { DEP } from "../config";
+import { DEP, IS_MAINNET } from "../config";
 import { loadKeeper, loadMarket, loadStatus, loadVault, loadVaultList, type VaultData } from "../data";
 import { Badge, Card, Spinner, WeightBar } from "../ui";
 import { ago, fmtPct, fmtUsd, short, useAsync } from "../util";
@@ -81,7 +81,13 @@ function Market() {
     <Card
       className="market"
       title="Live market: what the vaults are priced at"
-      extra={<span className="muted small">HSK Chain mainnet prices, mirrored to testnet every hour by the keeper</span>}
+      extra={
+        <span className="muted small">
+          {IS_MAINNET
+            ? "read live on HSK Chain mainnet: the vaults' 30-minute TWAP feeds and the HSKSwap pools"
+            : "HSK Chain mainnet prices, mirrored to testnet every hour by the keeper"}
+        </span>
+      }
     >
       {error && <div className="err">{error}</div>}
       {!rows && !error && <Spinner />}
@@ -91,9 +97,9 @@ function Market() {
             <thead>
               <tr>
                 <th>Coin</th>
-                <th className="num">Oracle</th>
-                <th className="num">Testnet HSKSwap pool</th>
-                <th className="num">Mainnet HSKSwap TWAP</th>
+                <th className="num">{IS_MAINNET ? "Oracle (30-min TWAP)" : "Oracle"}</th>
+                <th className="num">{IS_MAINNET ? "HSKSwap pool (spot)" : "Testnet HSKSwap pool"}</th>
+                <th className="num">{IS_MAINNET ? "APRO (reference)" : "Mainnet HSKSwap TWAP"}</th>
                 <th className="num">7d</th>
                 <th className="num">30d</th>
                 <th>Source</th>
@@ -118,10 +124,12 @@ function Market() {
                         gap {(r.gapBps / 100).toFixed(2)}%
                       </Badge>
                     </td>
-                    <td className="num">{m ? fmtUsd(m.poolTwap, digits) : "–"}</td>
+                    <td className="num">{m ? (IS_MAINNET ? (m.source === "apro" ? fmtUsd(m.price, digits) : "–") : fmtUsd(m.poolTwap, digits)) : "–"}</td>
                     <td className={`num ${(s?.ret7d ?? 0) >= 0 ? "pos" : "neg"}`}>{fmtPct(s?.ret7d)}</td>
                     <td className={`num ${(s?.ret30d ?? 0) >= 0 ? "pos" : "neg"}`}>{fmtPct(s?.ret30d)}</td>
-                    <td className="small muted">{m?.source === "apro" ? "APRO feed (mainnet)" : "HSKSwap 30-min TWAP (mainnet)"}</td>
+                    <td className="small muted">
+                      {IS_MAINNET ? "TwapFeed over the mainnet HSKSwap pool" : m?.source === "apro" ? "APRO feed (mainnet)" : "HSKSwap 30-min TWAP (mainnet)"}
+                    </td>
                   </tr>
                 );
               })}
@@ -153,7 +161,7 @@ export function Home() {
             to the agent to see your positions and change the rules.
           </p>
           <div className="hero-cta">
-            <a className="btn" href={DEP.demoVaults[1] ? `#/vault/${DEP.demoVaults[1].vault}` : "#/create"}>
+            <a className="btn" href={DEP.demoVaults.length ? `#/vault/${(DEP.demoVaults[1] ?? DEP.demoVaults[0]).vault}` : "#/create"}>
               Talk to a live vault
             </a>
             <a className="btn ghost" href="#/create">
@@ -206,7 +214,17 @@ export function Home() {
         </div>
       </section>
 
-      <h2 className="section-title">Live vaults, traded by the Leash agent on HSK Chain testnet</h2>
+      {IS_MAINNET ? (
+        <>
+          <h2 className="section-title">Live on HSK Chain mainnet: real USDT, real HSKSwap pools</h2>
+          <p className="small muted">
+            One small vault (about a dollar) runs the same contracts and the same agent as the testnet demo. Every
+            trade below is a real swap in an HSKSwap mainnet pool, checked by the vault against its rules.
+          </p>
+        </>
+      ) : (
+        <h2 className="section-title">Live vaults, traded by the Leash agent on HSK Chain testnet</h2>
+      )}
       <div className="grid3">
         {DEP.demoVaults.map((d) => (
           <VaultCard key={d.vault} address={d.vault} name={d.name} profile={d.profile} />

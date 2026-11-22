@@ -1,4 +1,4 @@
-import { DEP, MAINNET_DEP, REPO } from "../config";
+import { MAINNET_DEP, REPO, TESTNET_DEP as DEP } from "../config";
 import { AddrLink, Card } from "../ui";
 
 export function AboutPage() {
@@ -29,9 +29,9 @@ export function AboutPage() {
             onchain; the app re-checks the hash.
           </li>
           <li>
-            <b>The keeper</b> mirrors HSK Chain mainnet prices to the testnet, realigns the testnet pools and calls{" "}
-            <code>stopOut</code> for any position whose stop-loss or breaker triggered. <code>stopOut</code> is
-            permissionless: anyone can enforce the rules.
+            <b>The keeper</b> mirrors HSK Chain mainnet prices to the testnet and realigns the testnet pools; on both
+            networks it calls <code>stopOut</code> for any position whose stop-loss or breaker triggered.{" "}
+            <code>stopOut</code> is permissionless: anyone can enforce the rules.
           </li>
           <li>
             <b>The chat</b> on each vault page answers questions about positions and profit, and turns instructions ("max
@@ -59,20 +59,20 @@ export function AboutPage() {
               <tr>
                 <td>LeashFactory (testnet)</td>
                 <td>
-                  <AddrLink address={DEP.factory} label={DEP.factory} />
+                  <AddrLink address={DEP.factory} label={DEP.factory} mainnet={false} />
                 </td>
               </tr>
               <tr>
                 <td>SwapDesk (testnet)</td>
                 <td>
-                  <AddrLink address={DEP.desk} label={DEP.desk} />
+                  <AddrLink address={DEP.desk} label={DEP.desk} mainnet={false} />
                 </td>
               </tr>
               {DEP.hub && (
                 <tr>
                   <td>MirrorFeedHub (testnet)</td>
                   <td>
-                    <AddrLink address={DEP.hub} label={DEP.hub} />
+                    <AddrLink address={DEP.hub} label={DEP.hub} mainnet={false} />
                   </td>
                 </tr>
               )}
@@ -80,7 +80,7 @@ export function AboutPage() {
                 <tr>
                   <td>PoolAligner (testnet)</td>
                   <td>
-                    <AddrLink address={DEP.aligner} label={DEP.aligner} />
+                    <AddrLink address={DEP.aligner} label={DEP.aligner} mainnet={false} />
                   </td>
                 </tr>
               )}
@@ -88,7 +88,7 @@ export function AboutPage() {
                 <tr key={a.ticker}>
                   <td>HSKSwap t{a.ticker === "HSK" ? "HSK" : `W${a.ticker}`}/tUSDT pool (testnet)</td>
                   <td>
-                    <AddrLink address={a.pool} label={a.pool} />
+                    <AddrLink address={a.pool} label={a.pool} mainnet={false} />
                   </td>
                 </tr>
               ))}
@@ -106,6 +106,22 @@ export function AboutPage() {
                       <AddrLink address={MAINNET_DEP.desk} label={MAINNET_DEP.desk} mainnet />
                     </td>
                   </tr>
+                  {MAINNET_DEP.assets.map((a) => (
+                    <tr key={`m-${a.ticker}`}>
+                      <td>TwapFeed {a.ticker}/USD (mainnet)</td>
+                      <td>
+                        <AddrLink address={a.feed} label={a.feed} mainnet />
+                      </td>
+                    </tr>
+                  ))}
+                  {MAINNET_DEP.demoVaults.map((v) => (
+                    <tr key={v.vault}>
+                      <td>Live vault (mainnet)</td>
+                      <td>
+                        <AddrLink address={v.vault} label={v.vault} mainnet />
+                      </td>
+                    </tr>
+                  ))}
                 </>
               )}
             </tbody>
@@ -118,7 +134,11 @@ export function AboutPage() {
 
       <Card title="Honest notes">
         <ul className="bullets small">
-          <li>Everything runs on HSK Chain testnet with test tokens; no real money is involved.</li>
+          <li>
+            The three demo vaults and every community vault run on HSK Chain testnet with test tokens; no real money is
+            involved there. One small vault (about a dollar of USDT) runs on HSK Chain mainnet with the same contracts and
+            the same agent, trading the real HSKSwap pools once a day; switch the network at the top to see it.
+          </li>
           <li>The LLM is a free, keyless open-weight model (via Pollinations). It proposes; code and the vault decide.</li>
           <li>Built by Phant Studio with AI coding assistants (GitHub Copilot). Leash started as an entry for the Base Stocks Maxxing quest (tokenized stocks on Base); this HSK Chain version was rebuilt for the HSK Chain Horizon Hackathon: new HSKSwap desk, stop-loss and drawdown breaker, TWAP/APRO price layer, keeper and chat.</li>
         </ul>

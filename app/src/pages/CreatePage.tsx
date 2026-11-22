@@ -2,12 +2,37 @@ import { useState } from "react";
 import { decodeEventLog, formatEther, parseUnits } from "viem";
 import { useWallet } from "../App";
 import { ABI, send, testnet } from "../clients";
-import { DEP, FAUCET_URL, PRESETS, TOKEN_BY_TICKER } from "../config";
+import { DEP, FAUCET_URL, IS_MAINNET, MAINNET_DEP, PRESETS, TOKEN_BY_TICKER, switchNet } from "../config";
 import { Badge, Card, Spinner } from "../ui";
 import { duration, fmtUsd, useAsync } from "../util";
 import { explainRevert } from "./VaultPage";
 
 export function CreatePage() {
+  if (IS_MAINNET) return <MainnetCreateNote />;
+  return <CreateForm />;
+}
+
+function MainnetCreateNote() {
+  return (
+    <div className="page narrow">
+      <h1>Create a Leash vault</h1>
+      <Card title="On mainnet, try it on testnet first">
+        <p>
+          The same <code>LeashFactory</code> is live on HSK Chain mainnet and anyone can call <code>createVault</code>, but
+          this app does not ask you to put real money in. The live mainnet vault (
+          <a href={`#/vault/${MAINNET_DEP?.demoVaults[0]?.vault ?? ""}`}>about a dollar of USDT</a>) shows the agent and
+          the rules working with real funds.
+        </p>
+        <p>To create your own vault, talk to its agent and sign rule changes with free test USDT, switch to testnet.</p>
+        <button className="btn" onClick={() => switchNet("testnet", "#/create")}>
+          Switch to HSK Chain testnet
+        </button>
+      </Card>
+    </div>
+  );
+}
+
+function CreateForm() {
   const { address, wallet, connect } = useWallet();
   const [preset, setPreset] = useState(PRESETS[1].id);
   const [amount, setAmount] = useState("10000");

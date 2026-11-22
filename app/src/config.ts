@@ -51,15 +51,44 @@ export const hskMainnet = defineChain({
 
 const found = import.meta.glob("../../deployments/*.json", { eager: true, import: "default" }) as Record<string, Deployment>;
 export const DEPLOYMENTS = Object.values(found);
-/** The testnet deployment the app operates on. */
-export const DEP: Deployment = DEPLOYMENTS.find((d) => d.chainId === 133)!;
-/** The mainnet deployment, when there is one (read-only in the app). */
+export const TESTNET_DEP: Deployment = DEPLOYMENTS.find((d) => d.chainId === 133)!;
+/** The mainnet deployment: the same contracts and one small live vault. */
 export const MAINNET_DEP: Deployment | undefined = DEPLOYMENTS.find((d) => d.chainId === 177);
 
-export const CHAIN: Chain = hskTestnet;
+export type Net = "testnet" | "mainnet";
+const NET_KEY = "leash-hsk-net";
+
+function pickNet(): Net {
+  const fromUrl = new URLSearchParams(location.search).get("net");
+  let saved: string | null = null;
+  try {
+    if (fromUrl === "testnet" || fromUrl === "mainnet") localStorage.setItem(NET_KEY, fromUrl);
+    saved = localStorage.getItem(NET_KEY);
+  } catch {}
+  return (fromUrl ?? saved) === "mainnet" && MAINNET_DEP ? "mainnet" : "testnet";
+}
+
+/** The network the app shows: HSK Chain testnet by default, mainnet with ?net=mainnet or the header switch. */
+export const NET: Net = pickNet();
+export const IS_MAINNET = NET === "mainnet";
+export const DEP: Deployment = IS_MAINNET ? MAINNET_DEP! : TESTNET_DEP;
+
+export function switchNet(net: Net, hash = "#/") {
+  try {
+    localStorage.setItem(NET_KEY, net);
+  } catch {}
+  const u = new URL(location.href);
+  u.searchParams.delete("net");
+  u.hash = hash;
+  history.replaceState(null, "", u.toString());
+  location.reload();
+}
+
+export const CHAIN: Chain = IS_MAINNET ? hskMainnet : hskTestnet;
 export const MAINNET = hskMainnet;
-export const EXPLORER = "https://testnet-explorer.hsk.xyz";
+export const TESTNET_EXPLORER = "https://testnet-explorer.hsk.xyz";
 export const MAINNET_EXPLORER = "https://hsk.blockscout.com";
+export const EXPLORER = IS_MAINNET ? MAINNET_EXPLORER : TESTNET_EXPLORER;
 export const FAUCET_URL = "https://faucet.hsk.xyz/faucet";
 
 export const REPO = "https://github.com/SuperPhant/leash-hsk";

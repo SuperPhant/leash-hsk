@@ -5,7 +5,9 @@ trade frequency, a stop-loss and a drawdown breaker live in the vault contract, 
 wrong, the bot is offline or its key leaks. Talk to the agent to see your positions and profit in real time and to
 change the rules in plain words; every change is a transaction you sign.
 
-- **Live app:** https://superphant.github.io/leash-hsk/ (HSK Chain testnet, chain id 133)
+- **Live app:** https://superphant.github.io/leash-hsk/ — the testnet demo (HSK Chain testnet, chain id 133) and one
+  small live vault on HSK Chain mainnet (chain id 177; switch the network at the top, or open
+  [`?net=mainnet`](https://superphant.github.io/leash-hsk/?net=mainnet))
 - **Track:** HSK Chain Horizon Hackathon (Seoul), AI Agent Trading
 - **Built with:** HSKSwap (Uniswap V3) factory, pools and SwapRouter02 · APRO price feeds on HSK Chain mainnet ·
   Solidity/Foundry · TypeScript/viem · GitHub Actions · an open-weight LLM
@@ -79,7 +81,9 @@ change the rules in plain words; every change is a transaction you sign.
   (the price hub's `Relayed` rounds, timestamped on mainnet). A buy is right if the price rose, a sell if it fell;
   "value added" is what each decision earned or saved over those 24 hours versus not trading. Each vault is also
   compared with holding its first allocation and with staying in cash, and every rationale note is re-hashed and
-  matched to the hash in its `Rebalanced` event. No number on the page comes from our servers.
+  matched to the hash in its `Rebalanced` event. No number on the page comes from our servers. On mainnet there is no
+  price hub: the browser reads the vault's own `TwapFeed` at the block 24 hours after each trade (HSK Chain makes a
+  block every 2 seconds and its RPC serves historical state).
 
 ## Try it (about 3 minutes)
 
@@ -114,12 +118,28 @@ change the rules in plain words; every change is a transaction you sign.
 HSKSwap testnet contracts used: factory `0x2dC2c21D1049F786C535bF9d45F999dB5474f3A0`, SwapRouter02
 `0xa6914E66690c6794244B5f66a09eAEbf66254237`, NonfungiblePositionManager `0x73dEc6bfa6751509b08480bd97f54b874E3b20e8`.
 
-**HSK Chain mainnet (177)** — the same `LeashFactory` and `SwapDesk`, with `TwapFeed`s over the real WHSK/USDT,
-WBTC/USDT and WETH/USDT HSKSwap pools, and one small live vault. Deployment pending (it needs mainnet HSK for gas).
-`agent/src/deployMainnet.ts` deploys all of it in one run; we rehearsed it on a local fork of mainnet: about 12.3M gas
-(about 6 HSK at 500 gwei), then an agent cycle that rebalanced the new vault through the real pools (1.0M gas) and a
-keeper sweep. The mainnet fork test (`contracts/test/Mainnet.t.sol`) also creates a vault and buys WHSK through the
-real HSKSwap pool.
+**HSK Chain mainnet (177)** — [`deployments/177.json`](deployments/177.json), deployed Nov 22, 2026. The same
+`LeashFactory` and `SwapDesk`, with `TwapFeed`s over the real WHSK/USDT, WBTC/USDT and WETH/USDT HSKSwap pools, and
+one small live vault holding real USDT. Every contract's source is verified on HSK Blockscout and on Sourcify (exact
+match).
+
+| Contract | Address |
+|---|---|
+| LeashFactory | [`0xaae1642d99d83a3cd6e05b0c14fd2d5fa2b6f1a9`](https://hsk.blockscout.com/address/0xaae1642d99d83a3cd6e05b0c14fd2d5fa2b6f1a9?tab=contract) |
+| SwapDesk | [`0x5a59130edc19ee24151d2e87464e053eea5cc1cd`](https://hsk.blockscout.com/address/0x5a59130edc19ee24151d2e87464e053eea5cc1cd?tab=contract) |
+| TwapFeed HSK/USD (WHSK/USDT pool) | [`0x4b7f5d3ae4b159b8bae47ea5e7d4c9381686fb5c`](https://hsk.blockscout.com/address/0x4b7f5d3ae4b159b8bae47ea5e7d4c9381686fb5c?tab=contract) |
+| TwapFeed BTC/USD (WBTC/USDT pool) | [`0x6dbf8fe17c6cd855119945d17f6890c97d9f6d49`](https://hsk.blockscout.com/address/0x6dbf8fe17c6cd855119945d17f6890c97d9f6d49?tab=contract) |
+| TwapFeed ETH/USD (WETH/USDT pool) | [`0xb2000190e64472578299a06210c4939310400d62`](https://hsk.blockscout.com/address/0xb2000190e64472578299a06210c4939310400d62?tab=contract) |
+| Live vault: Leash Mainnet (Balanced) | [`0xa813772199915f36e74d636db7D7cFB2ED36D7DB`](https://superphant.github.io/leash-hsk/?net=mainnet#/vault/0xa813772199915f36e74d636db7D7cFB2ED36D7DB) ([explorer](https://hsk.blockscout.com/address/0xa813772199915f36e74d636db7D7cFB2ED36D7DB?tab=contract)) |
+
+The vault started with 0.887 USDT under the Balanced rules (caps BTC 40%, ETH 35%, HSK 25%, 15% cash floor, 12%
+stop-loss, 20% drawdown breaker). The agent's first mainnet rebalance bought BTC $0.13, ETH $0.18 and HSK $0.13
+through the real pools:
+[`0x24821136…58b0db5`](https://hsk.blockscout.com/tx/0x2482113665c33a55abf8ac20dff2b1730013d4cfbcb455b7628914c1558b0db5).
+The agent key holds a few HSK for gas and can only call `rebalance`; the owner is a separate key. Before going live,
+`agent/src/deployMainnet.ts` was rehearsed on a local fork of mainnet (about 12.3M gas for the deployment, 1.0M for a
+rebalance), and the mainnet fork test (`contracts/test/Mainnet.t.sol`) creates a vault and buys WHSK through the real
+HSKSwap pool.
 
 ## Run it yourself
 
@@ -136,13 +156,16 @@ cd app && npm ci && npm run dev
 ```
 
 The GitHub Actions workflows `agent.yml` (every 4 h) and `keeper.yml` (hourly) run the same scripts and publish
-rationale notes and status to the `notes` branch. `tick.yml` starts them on that schedule, because GitHub's own cron
-trigger ran hours late for this repository.
+rationale notes and status to the `notes` branch. `agent-mainnet.yml` runs the mainnet vault once a day (14:29 UTC):
+a keeper pass that sweeps any triggered stop-loss or breaker, then one agent cycle. `tick.yml` starts them all on
+that schedule, because GitHub's own cron trigger ran hours late for this repository.
 
 ## Honest notes
 
-- Everything that trades runs on HSK Chain **testnet** with test tokens; no real money is involved. The prices are
-  real HSK Chain mainnet prices.
+- The three demo vaults and every community vault run on HSK Chain **testnet** with test tokens; no real money is
+  involved there. Their prices are real HSK Chain mainnet prices. One small vault (under a dollar of USDT) runs on
+  HSK Chain **mainnet** with the same contracts and agent, trading the real pools once a day. It is there to show the
+  system working with real funds, not to earn anything; the app never asks visitors to deposit real money.
 - The LLM is a free, keyless open-weight model (via Pollinations), called by the agent on GitHub Actions. It
   proposes; code and the vault decide. The keyless endpoint does not accept browser requests, so the in-app chat
   parses instructions in the browser and quotes the agent's LLM rationale rather than calling a model itself.
