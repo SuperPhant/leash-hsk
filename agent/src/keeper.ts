@@ -4,6 +4,7 @@
 //   2. align: if a testnet pool drifted from its oracle, the PoolAligner swaps it back (the arbitrageur's job).
 //   3. sweep: calls `stopOut` on every vault position whose stop-loss or drawdown breaker has triggered. Anyone may
 //      call it; the keeper just makes sure someone does, so the rules hold even if the AI agent is offline.
+// On mainnet only the sweep runs: the TWAP feeds read the real pools directly and nobody needs to realign them.
 import { BaseError, ContractFunctionRevertedError, type Account, type PublicClient, type WalletClient } from "viem";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -226,6 +227,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     ["align", () => align(pub, wallet, account, dep)],
     ["sweep", () => sweep(pub, wallet, account, dep)],
   ] as const) {
+    if (name !== "sweep" && !dep.hub) {
+      out[name] = "not needed on mainnet";
+      continue;
+    }
     try {
       out[name] = await step();
     } catch (e) {

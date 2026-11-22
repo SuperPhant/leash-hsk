@@ -114,9 +114,12 @@ change the rules in plain words; every change is a transaction you sign.
 HSKSwap testnet contracts used: factory `0x2dC2c21D1049F786C535bF9d45F999dB5474f3A0`, SwapRouter02
 `0xa6914E66690c6794244B5f66a09eAEbf66254237`, NonfungiblePositionManager `0x73dEc6bfa6751509b08480bd97f54b874E3b20e8`.
 
-**HSK Chain mainnet (177)** — the same `LeashFactory` and `SwapDesk`, with `TwapFeed`s over the real WHSK/USDT and
-WBTC/USDT HSKSwap pools. Deployment pending; the mainnet fork test (`contracts/test/Mainnet.t.sol`) already creates a
-vault and buys WHSK through the real HSKSwap pool.
+**HSK Chain mainnet (177)** — the same `LeashFactory` and `SwapDesk`, with `TwapFeed`s over the real WHSK/USDT,
+WBTC/USDT and WETH/USDT HSKSwap pools, and one small live vault. Deployment pending (it needs mainnet HSK for gas).
+`agent/src/deployMainnet.ts` deploys all of it in one run; we rehearsed it on a local fork of mainnet: about 12.3M gas
+(about 6 HSK at 500 gwei), then an agent cycle that rebalanced the new vault through the real pools (1.0M gas) and a
+keeper sweep. The mainnet fork test (`contracts/test/Mainnet.t.sol`) also creates a vault and buys WHSK through the
+real HSKSwap pool.
 
 ## Run it yourself
 
@@ -127,6 +130,7 @@ cd contracts && forge test -vv
 cd agent && npm ci
 AGENT_KEY=0x... npx tsx src/run.ts        # one agent cycle
 KEEPER_KEY=0x... npx tsx src/keeper.ts    # one keeper cycle
+LEASH_CHAIN=hskMainnet DEPLOYER_KEY=0x... LEASH_MAINNET_AGENT=0x... npx tsx src/deployMainnet.ts   # mainnet deploy
 # app
 cd app && npm ci && npm run dev
 ```

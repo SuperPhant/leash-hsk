@@ -157,8 +157,12 @@ async function handleVault(vault: `0x${string}`, signals: Signal[], asOf: string
     minCashBps: BigInt(mandate.minCashBps),
     spreadBps: COST_BPS,
     slippageBps: BigInt(mandate.maxSlippageBps),
-    // Testnet gas is scarce (faucet: 0.1 HSK a day), so drift below 1.5% of NAV is left alone.
-    minTradeUsd: (nav * 150n) / 10_000n > 100_000_000n ? (nav * 150n) / 10_000n : 100_000_000n,
+    // Testnet gas is scarce (faucet: 0.1 HSK a day), so drift below 1.5% of NAV is left alone. The mainnet vault holds
+    // about a dollar, so there the floor is ten cents.
+    minTradeUsd: (() => {
+      const floor = chain.testnet ? 100_000_000n : 100_000n;
+      return (nav * 150n) / 10_000n > floor ? (nav * 150n) / 10_000n : floor;
+    })(),
   });
   if (tripped) plan = { ...plan, trades: plan.trades.filter((t) => !t.buy) };
   if (!plan.trades.length) {
@@ -198,8 +202,9 @@ async function handleVault(vault: `0x${string}`, signals: Signal[], asOf: string
     },
     market: {
       asOf,
-      source:
-        "HSK Chain mainnet: APRO HSK/USD and BTC/USD feeds, HSKSwap WETH/USDT 30-min TWAP (mirrored to testnet by the keeper); HSKSwap pool depth; CoinGecko daily closes",
+      source: chain.testnet
+        ? "HSK Chain mainnet: APRO HSK/USD and BTC/USD feeds, HSKSwap WETH/USDT 30-min TWAP (mirrored to testnet by the keeper); HSKSwap pool depth; CoinGecko daily closes"
+        : "HSK Chain mainnet: HSKSwap 30-min TWAPs read by the vault's own feeds, APRO HSK/USD and BTC/USD feeds for comparison; HSKSwap pool depth; CoinGecko daily closes",
       signals: vaultSignals,
     },
     decision: {
@@ -222,7 +227,9 @@ async function handleVault(vault: `0x${string}`, signals: Signal[], asOf: string
       minAmountOut: t.minAmountOut.toString(),
       notionalUsd: Number(t.usd) / 1e6,
     })),
-    disclaimer: "Testnet demonstration on mirrored HSK Chain mainnet prices. Not investment advice.",
+    disclaimer: chain.testnet
+      ? "Testnet demonstration on mirrored HSK Chain mainnet prices. Not investment advice."
+      : "Live on HSK Chain mainnet with a small demonstration balance. Not investment advice.",
   });
 
   const extra: string[] = [];
