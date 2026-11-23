@@ -140,6 +140,15 @@ export function AboutPage() {
             the same agent, trading the real HSKSwap pools once a day; switch the network at the top to see it.
           </li>
           <li>The LLM is a free, keyless open-weight model (via Pollinations). It proposes; code and the vault decide.</li>
+          <li>
+            The <a href="#/record">track record</a> does not flatter the agent: its graded calls are close to a coin flip
+            so far. Leash does not claim the agent beats the market; it claims the agent cannot break its owner&apos;s
+            rules, and that anyone can check every decision it made.
+          </li>
+          <li>
+            A hackathon prototype, not a financial service: the mainnet vault holds under a dollar of our own USDT, and
+            the app takes no deposits from the public, holds no one else&apos;s assets and collects no personal data.
+          </li>
           <li>Built by Phant Studio with AI coding assistants (GitHub Copilot). Leash started as an entry for the Base Stocks Maxxing quest (tokenized stocks on Base); this HSK Chain version was rebuilt for the HSK Chain Horizon Hackathon: new HSKSwap desk, stop-loss and drawdown breaker, TWAP/APRO price layer, keeper and chat.</li>
         </ul>
       </Card>

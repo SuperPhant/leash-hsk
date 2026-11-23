@@ -1,16 +1,42 @@
 # Leash for HSK Chain
 
-**An AI trading agent for HSKSwap that can only act inside an onchain mandate its owner sets.** Position caps,
-trade frequency, a stop-loss and a drawdown breaker live in the vault contract, so they hold even when the model is
-wrong, the bot is offline or its key leaks. Talk to the agent to see your positions and profit in real time and to
-change the rules in plain words; every change is a transaction you sign.
+**An AI trading agent that cannot break your rules, because the rules live in the vault that holds the money.** The
+owner writes position caps, trade frequency, a stop-loss and a drawdown breaker into a vault contract on HSK Chain.
+The agent researches and trades HSK, BTC and ETH on HSKSwap, but every trade it sends is checked by the vault and
+reverts if it breaks a rule, and it can never move funds out. Talk to the agent to see positions and profit and to
+change the rules in plain words; every change is a transaction the owner signs. Live on HSK Chain mainnet since
+Nov 22, with a small vault of real USDT.
 
 - **Live app:** https://superphant.github.io/leash-hsk/ — the testnet demo (HSK Chain testnet, chain id 133) and one
   small live vault on HSK Chain mainnet (chain id 177; switch the network at the top, or open
   [`?net=mainnet`](https://superphant.github.io/leash-hsk/?net=mainnet))
+- **Mainnet vault:** [`0xa8137721…D7DB`](https://superphant.github.io/leash-hsk/?net=mainnet#/vault/0xa813772199915f36e74d636db7D7cFB2ED36D7DB),
+  traded daily by the agent through the real HSKSwap pools; every contract verified on HSK Blockscout and Sourcify
 - **Track:** HSK Chain Horizon Hackathon (Seoul), AI Agent Trading
 - **Built with:** HSKSwap (Uniswap V3) factory, pools and SwapRouter02 · APRO price feeds on HSK Chain mainnet ·
   Solidity/Foundry · TypeScript/viem · GitHub Actions · an open-weight LLM
+
+## Why it is different
+
+1. **The contract enforces the rules; the bot does not promise them.** Per-coin caps, a cash floor, daily turnover,
+   slippage against the oracle, oracle freshness and a minimum time between trades are checked by the vault after
+   every rebalance. A model error, an outage or a leaked agent key cannot get past them. **Try to break the leash:**
+   every vault page simulates the agent's most dangerous moves against the vault's live state with `eth_call` (no
+   wallet, no gas) and shows the contract's revert reason for each, next to a normal trade that goes through. On the
+   mainnet vault: 5 attacks blocked, the normal trade allowed.
+2. **Anyone can enforce the stop-loss.** Each position has a stop-loss from its average entry price, taken from the
+   actual fills. Once it triggers, `stopOut` is permissionless: the keeper calls it every hour, but anyone can, and the
+   agent cannot buy the coin back straight away. A drawdown breaker on NAV leaves the agent able only to sell until the
+   owner resets it.
+3. **Every decision can be checked.** The agent publishes the rationale for each rebalance (signals, a rules
+   baseline, the LLM's proposal, the final weights and every place the leash pulled) and commits its keccak256 in the
+   vault's `Rebalanced` event; the app re-hashes it. The [track record](https://superphant.github.io/leash-hsk/#/record)
+   grades every trade 24 hours later against the vault's own oracle, computed in the visitor's browser from chain
+   data alone, including mainnet trades (read at the block 24 hours later).
+4. **Real trades with real money.** The mainnet vault holds USDT and trades three coins through the real HSKSwap
+   pools, under the same contracts and agent as the testnet demo, whose prices mirror mainnet every hour.
+5. **Rules in plain words.** "Max 15% in HSK", "trade at most every 8 hours" or "I'm worried about a crash" become a
+   concrete rule change, clamped to what the contract accepts, shown as a diff and signed by the owner.
 
 ## What it does
 
@@ -83,7 +109,8 @@ change the rules in plain words; every change is a transaction you sign.
   compared with holding its first allocation and with staying in cash, and every rationale note is re-hashed and
   matched to the hash in its `Rebalanced` event. No number on the page comes from our servers. On mainnet there is no
   price hub: the browser reads the vault's own `TwapFeed` at the block 24 hours after each trade (HSK Chain makes a
-  block every 2 seconds and its RPC serves historical state).
+  block every 2 seconds and its RPC serves historical state). The ten testnet trades made on stale prices on Nov 21
+  (see Honest notes) are listed with their grades but left out of the totals.
 
 ## Try it (about 3 minutes)
 
@@ -96,6 +123,8 @@ change the rules in plain words; every change is a transaction you sign.
 4. Or just watch the three live demo vaults (Conservative, Balanced, Aggressive) and their verified rationales, and
    check the agent's graded **Track record**. On any vault page, **Try them all** in *Try to break the leash* runs
    the agent's worst moves against the contract without a wallet.
+5. Switch the network at the top to **HSK Chain Mainnet** to see the live vault, its real HSKSwap trades and their
+   grades, and to run the same attacks against a vault holding real money.
 
 ## Deployments
 
@@ -175,8 +204,20 @@ that schedule, because GitHub's own cron trigger ran hours late for this reposit
 - The testnet pools are realigned to the mainnet price once an hour, so a trade made between two alignments can pay a
   wider spread than it would on mainnet. The track record counts that cost; it shows up in "Trading added".
 - On Nov 21 the hourly keeper did not run on schedule, so the trades at 06:23 and 09:10 UTC used prices relayed hours
-  earlier (BTC about 4% and ETH about 5% below the live mainnet price). Their 24-hour grades carry that error. The
-  agent now runs a keeper pass right before trading, and `tick.yml` keeps the keeper on time.
+  earlier (BTC about 4% and ETH about 5% below the live mainnet price). A wrong entry price distorts a 24-hour grade,
+  so the track record lists those ten trades but leaves them out of its hit rate and value added (with them, the
+  value added would have read about +$4,800 instead of about +$160). The agent now runs a keeper pass right before
+  trading, and `tick.yml` keeps the keeper on time.
+- The track record does not flatter the agent. As of Nov 24 its graded calls were close to a coin flip (11 right, 11
+  wrong, 8 flat on the testnet; 2 right and 1 wrong on mainnet), and against simply holding their first allocation
+  the testnet vaults ranged from −0.70% to +0.22%. Leash's claim is not that the agent beats the market; it is that
+  the agent cannot break its owner's rules, and that anyone can check every decision it made.
+- This is a hackathon prototype, not a financial service. The mainnet vault holds under a dollar of our own USDT; the
+  app takes no deposits from the public, holds no one else's assets and collects no personal data. Offering it as a
+  service in Korea or elsewhere would need its own legal review.
+- Not related to the project named "Leash" in this hackathon's HSP payments track (agent spending budgets, another
+  team). This Leash has been public since Nov 20 ([SuperPhant/leash](https://github.com/SuperPhant/leash), on Base)
+  and Nov 21 (this repository).
 - Built by Phant Studio with AI coding assistants (GitHub Copilot). Not investment advice.
 
 MIT licence.

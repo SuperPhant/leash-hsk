@@ -22,7 +22,22 @@ function inHours(t: number) {
 function VerdictBadge({ t }: { t: GradedTrade }) {
   const tone: Record<Verdict, "ok" | "bad" | "neutral" | "blue"> = { right: "ok", wrong: "bad", flat: "neutral", pending: "blue" };
   const label = t.verdict === "pending" ? `in ${inHours(t.gradesAt)}` : t.verdict;
-  return <Badge tone={tone[t.verdict]}>{label}</Badge>;
+  return (
+    <>
+      <Badge tone={tone[t.verdict]}>{label}</Badge>
+      {t.staleEntry && (
+        <>
+          {" "}
+          <Badge
+            tone="warn"
+            title="Made on Nov 21 before 10:00 UTC, when the agent could still trade on a price relayed hours earlier. Listed, but not counted in the hit rate or value added."
+          >
+            stale price · not counted
+          </Badge>
+        </>
+      )}
+    </>
+  );
 }
 
 function Who({ t }: { t: GradedTrade }) {
@@ -56,11 +71,15 @@ export function RecordPage() {
               value={`${t.graded} of ${t.trades}`}
               hint={t.pending ? `${t.pending} waiting for their ${HORIZON / 3600} hours; next in ${inHours(t.nextGradeAt!)}` : "all graded"}
             />
-            <Stat label="Hit rate" value={t.hitRate === null ? "–" : fmtPct(t.hitRate, 0)} hint={`${t.right} right · ${t.wrong} wrong · ${t.flat} flat`} />
+            <Stat
+              label="Hit rate"
+              value={t.hitRate === null ? "–" : fmtPct(t.hitRate, 0)}
+              hint={`${t.right} right · ${t.wrong} wrong · ${t.flat} flat${t.excluded ? ` · ${t.excluded} stale-price trades not counted` : ""}`}
+            />
             <Stat
               label="Value added by trading"
-              value={t.graded ? signedUsd(t.valueAdded) : "–"}
-              hint={t.graded ? `on ${fmtUsd(t.notionalGraded, 0)} traded, over ${HORIZON / 3600} h, vs not trading` : "appears after the first grade"}
+              value={t.graded - t.excluded ? signedUsd(t.valueAdded) : "–"}
+              hint={t.graded - t.excluded ? `on ${fmtUsd(t.notionalGraded, 0)} traded, over ${HORIZON / 3600} h, vs not trading` : "appears after the first grade"}
             />
             <Stat
               label="Rationales verified"
@@ -227,8 +246,10 @@ export function RecordPage() {
                 <li>
                   <b>Known error on Nov 21:</b> the hourly keeper did not run on schedule that day, so the trades at 06:23
                   and 09:10 UTC used prices relayed hours earlier: BTC about 4% and ETH about 5% below the live mainnet
-                  price. Their grades carry that error, in both directions. Since then the agent refreshes prices right
-                  before every trade.
+                  price. A wrong entry price distorts their grades (the buys look like good calls 24 hours later, the
+                  sell like a bad one), so they are listed with their grades, marked <i>stale price</i>, and left out of
+                  the hit rate, the value added and each vault&apos;s graded trades. Since then the agent refreshes
+                  prices right before every trade.
                 </li>
               )}
             </ul>

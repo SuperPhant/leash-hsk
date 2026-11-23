@@ -12,6 +12,12 @@ export const SETTLE = DEP.hub ? 3600 : 0;
 export const FLAT = 0.0005;
 /** HSK Chain makes a block every 2 seconds. */
 const BLOCK_SECONDS = 2;
+/**
+ * Testnet only. Until Nov 21 10:00 UTC the agent could trade on prices the hourly keeper had relayed hours earlier, and
+ * it did at 06:23 and 09:10 UTC that day (BTC about 4% and ETH about 5% below mainnet). Those trades are graded and
+ * listed, but left out of the totals: a wrong entry price makes their grades meaningless.
+ */
+export const STALE_UNTIL = DEP.hub ? Date.UTC(2026, 10, 21, 10, 0) / 1000 : 0;
 
 const feedAbi = parseAbi(["function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)"]);
 
@@ -48,6 +54,8 @@ export interface GradedTrade {
   roundAt?: number;
   move?: number;
   verdict: Verdict;
+  /** Made on a price relayed hours earlier (testnet, before STALE_UNTIL): graded and listed, not counted in totals. */
+  staleEntry?: boolean;
   /** What the decision earned (buy) or saved (sell) over the horizon, compared with not trading, in USD. */
   valueAdded?: number;
   rationaleURI?: string;
@@ -79,6 +87,8 @@ export interface Totals {
   wrong: number;
   flat: number;
   pending: number;
+  /** Graded trades left out of the hit rate and value added because they were made on a stale price. */
+  excluded: number;
   hitRate: number | null;
   valueAdded: number;
   notionalGraded: number;
@@ -192,6 +202,7 @@ export async function loadRecord(): Promise<RecordData> {
       logIndex: Number(l.logIndex),
       t0: times.get(l.blockNumber) ?? now,
     };
+    const staleEntry = (times.get(l.blockNumber) ?? now) < STALE_UNTIL;
     if (l.eventName === "Rebalanced") {
       rebalances.set(`${vault.toLowerCase()}:${a.epoch}`, {
         navBefore: Number(a.navBefore) / 1e6,
@@ -210,6 +221,7 @@ export async function loadRecord(): Promise<RecordData> {
         price0: Number(a.oraclePrice) / 1e8,
         gradesAt: base.t0 + HORIZON + SETTLE,
         verdict: "pending",
+        staleEntry,
       });
     } else if (l.eventName === "RiskExit") {
       trades.push({
@@ -221,6 +233,7 @@ export async function loadRecord(): Promise<RecordData> {
         price0: Number(a.price) / 1e8,
         gradesAt: base.t0 + HORIZON + SETTLE,
         verdict: "pending",
+        staleEntry,
       });
     }
   }
@@ -271,7 +284,7 @@ export async function loadRecord(): Promise<RecordData> {
     const data = await loadVault(v);
     // Deposits made after the first trade are left out of both returns.
     const later = Math.max(0, data.netDeposits - first.navBefore);
-    const graded = mine.filter((t) => t.verdict !== "pending");
+    const graded = mine.filter((t) => t.verdict !== "pending" && !t.staleEntry);
     vaultRecords.push({
       vault: v,
       name: names.get(v.toLowerCase()) ?? "",
@@ -290,8 +303,9 @@ export async function loadRecord(): Promise<RecordData> {
   }
 
   const graded = trades.filter((t) => t.verdict !== "pending");
-  const right = graded.filter((t) => t.verdict === "right").length;
-  const wrong = graded.filter((t) => t.verdict === "wrong").length;
+  const counted = graded.filter((t) => !t.staleEntry);
+  const right = counted.filter((t) => t.verdict === "right").length;
+  const wrong = counted.filter((t) => t.verdict === "wrong").length;
   const pending = trades.filter((t) => t.verdict === "pending");
   const withNotes = trades.filter((t) => t.rationaleURI);
   const uniqueNotes = new Set(withNotes.map((t) => t.rationaleURI));
@@ -305,11 +319,12 @@ export async function loadRecord(): Promise<RecordData> {
       graded: graded.length,
       right,
       wrong,
-      flat: graded.length - right - wrong,
+      flat: counted.length - right - wrong,
       pending: pending.length,
+      excluded: graded.length - counted.length,
       hitRate: right + wrong ? right / (right + wrong) : null,
-      valueAdded: graded.reduce((s, t) => s + (t.valueAdded ?? 0), 0),
-      notionalGraded: graded.reduce((s, t) => s + t.notional, 0),
+      valueAdded: counted.reduce((s, t) => s + (t.valueAdded ?? 0), 0),
+      notionalGraded: counted.reduce((s, t) => s + t.notional, 0),
       rationales: uniqueNotes.size,
       rationalesVerified: okNotes.size,
       nextGradeAt: pending.length ? Math.min(...pending.map((t) => t.gradesAt)) : null,
