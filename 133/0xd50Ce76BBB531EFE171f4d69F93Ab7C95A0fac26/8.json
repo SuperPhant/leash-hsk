@@ -1,0 +1,135 @@
+{
+  "schema": "leash-hsk.rationale/v1",
+  "chainId": 133,
+  "vault": "0xd50Ce76BBB531EFE171f4d69F93Ab7C95A0fac26",
+  "epoch": 8,
+  "agent": "0x447406ff8B4f98e4328974e26be1B92606D07f3d",
+  "createdAt": "2026-11-23T13:11:29.967Z",
+  "profile": {
+    "id": "momentum",
+    "name": "HSK Momentum",
+    "style": "Aggressive. Concentrate in whichever of HSK, BTC and ETH has the strongest risk-adjusted trend, rotate quickly out of laggards, accept larger swings within the caps."
+  },
+  "mandate": {
+    "caps": {
+      "HSK": "50.0%",
+      "BTC": "50.0%",
+      "ETH": "50.0%"
+    },
+    "minCash": "5.0%",
+    "maxTurnoverPerWindow": "80% per 24h",
+    "maxSlippage": "1.5%",
+    "maxOracleAge": "30.0h",
+    "tradeEvery": "2h at most",
+    "stopLoss": "15% below average entry",
+    "drawdownBreaker": "30% below high-water mark",
+    "expiry": "2027-11-21T06:22:10.000Z"
+  },
+  "risk": {
+    "nav": "$100,567.61",
+    "pnl": "+$567.61",
+    "drawdownFromPeak": "0%",
+    "breakerTripped": false,
+    "reentryBlocked": []
+  },
+  "market": {
+    "asOf": "2026-11-23T13:10:46.000Z",
+    "source": "HSK Chain mainnet: APRO HSK/USD and BTC/USD feeds, HSKSwap WETH/USDT 30-min TWAP (mirrored to testnet by the keeper); HSKSwap pool depth; CoinGecko daily closes",
+    "signals": [
+      {
+        "ticker": "HSK",
+        "price": 0.08049592,
+        "updatedAt": 1795386575,
+        "ageHours": 14.686388888888889,
+        "stale": false,
+        "ret1d": 0.001113644474900255,
+        "ret7d": -0.03888053466662478,
+        "ret30d": -0.07666495123804107,
+        "vol30d": 0.1933435086109158,
+        "maxDrawdown30d": -0.10036141844527102,
+        "mainnetPoolTwap": 0.08061493,
+        "mainnetPoolUsdtDepth": 419090.258749,
+        "aproVsPoolBps": 15,
+        "closes": 32,
+        "historySource": "coingecko daily"
+      },
+      {
+        "ticker": "BTC",
+        "price": 61236.8087805,
+        "updatedAt": 1795427657,
+        "ageHours": 3.274722222222222,
+        "stale": false,
+        "ret1d": 0.001059193051020424,
+        "ret7d": -0.05558320307432352,
+        "ret30d": -0.24221784201086605,
+        "vol30d": 0.4731092937636299,
+        "maxDrawdown30d": -0.27630417068899593,
+        "mainnetPoolTwap": 60472.86024234,
+        "mainnetPoolUsdtDepth": 44851.645257,
+        "aproVsPoolBps": -125,
+        "closes": 32,
+        "historySource": "coingecko daily"
+      },
+      {
+        "ticker": "ETH",
+        "price": 1715.79235701,
+        "updatedAt": 1795439410,
+        "ageHours": 0.01,
+        "stale": false,
+        "ret1d": -0.0033830478313899848,
+        "ret7d": -0.05697095499199356,
+        "ret30d": -0.27191072075543843,
+        "vol30d": 0.6641770136562023,
+        "maxDrawdown30d": -0.33163235911171596,
+        "mainnetPoolTwap": 1715.79235701,
+        "mainnetPoolUsdtDepth": 41980.465639,
+        "aproVsPoolBps": null,
+        "closes": 32,
+        "historySource": "coingecko daily"
+      }
+    ]
+  },
+  "decision": {
+    "source": "rules:inverse-vol+trend",
+    "summary": "Rules-based rebalance toward an inverse-volatility allocation with a momentum trend tilt.",
+    "perAsset": {},
+    "risks": [],
+    "current": {
+      "HSK": "14.9%",
+      "BTC": "7.5%",
+      "ETH": "3.8%"
+    },
+    "baseline": {},
+    "proposed": {},
+    "final": {},
+    "frozen": []
+  },
+  "leashCorrections": [],
+  "trades": [
+    {
+      "ticker": "HSK",
+      "side": "sell",
+      "venue": "HSKSwap (Uniswap V3) 0.3% pool",
+      "amountIn": "185734099641323436020111",
+      "minAmountOut": "14726574666",
+      "notionalUsd": 14950.837225
+    },
+    {
+      "ticker": "BTC",
+      "side": "sell",
+      "venue": "HSKSwap (Uniswap V3) 0.3% pool",
+      "amountIn": "12364597",
+      "minAmountOut": "7458109351",
+      "notionalUsd": 7571.684621
+    },
+    {
+      "ticker": "ETH",
+      "side": "sell",
+      "venue": "HSKSwap (Uniswap V3) 0.3% pool",
+      "amountIn": "2210963890532058338",
+      "minAmountOut": "3736651619",
+      "notionalUsd": 3793.554944
+    }
+  ],
+  "disclaimer": "Testnet demonstration on mirrored HSK Chain mainnet prices. Not investment advice."
+}
