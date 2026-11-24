@@ -451,7 +451,7 @@ function Activity({ v }: { v: VaultData }) {
   return (
     <Card title="Agent trades" extra={<span className="muted small">{v.epoch} rebalance{v.epoch === 1 ? "" : "s"} onchain</span>}>
       {!index && <Spinner />}
-      {index && !entry?.rebalances.length && <Empty>No trades yet. The agent runs every four hours.</Empty>}
+      {index && !entry?.rebalances.length && <Empty>No trades yet. The agent runs {IS_MAINNET ? "once a day" : "every four hours"}.</Empty>}
       <div className="timeline">
         {entry?.rebalances.slice(0, 12).map((r) => (
           <RebalanceItem key={r.tx} tx={r.tx} vault={v.address} noteUri={r.note} />

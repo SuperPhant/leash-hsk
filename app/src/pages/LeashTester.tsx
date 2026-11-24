@@ -104,16 +104,18 @@ function scenarios(v: VaultData): Scenario[] {
   const spare = v.cash - ((m.minCashBps + 100) / 10_000) * v.nav;
   const list: Scenario[] = [];
 
-  const normal = priced.filter((h) => h.weightBps < h.capBps - 200);
-  const small = Math.min(50, spare, budget * 0.5);
+  // The comparison buy must leave the coin well under its cap: in the mainnet vault (about a dollar) half the
+  // turnover budget is a quarter of the vault, enough to push a coin past its cap.
+  const room = (h: (typeof priced)[number]) => ((h.capBps - h.weightBps - 200) / 10_000) * v.nav;
+  const pick = priced.filter((h) => room(h) > 0).sort((a, b) => room(b) - room(a))[0];
+  const small = pick ? Math.min(50, spare, budget * 0.5, room(pick) * 0.5) : 0;
   // The mainnet vault holds about a dollar, so its scenarios use cents.
-  if (normal.length && small >= (IS_MAINNET ? 0.05 : 5)) {
-    const h = normal[0];
+  if (pick && small >= (IS_MAINNET ? 0.05 : 5)) {
     list.push({
       id: "normal",
       title: "A normal trade, for comparison",
-      story: `The agent buys ${fmtUsd(small, 0)} of ${h.ticker}, well inside every rule.`,
-      run: () => rebalance([buy(h.token, small)]),
+      story: `The agent buys ${fmtUsd(small, 0)} of ${pick.ticker}, well inside every rule.`,
+      run: () => rebalance([buy(pick.token, small)]),
     });
   }
 
