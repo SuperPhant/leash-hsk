@@ -8,6 +8,12 @@ export const fmtUsd = (x: number, digits = 2) => {
 export const fmtPct = (x: number | null | undefined, digits = 1) =>
   x === null || x === undefined || !Number.isFinite(x) ? "–" : `${(x * 100).toFixed(digits)}%`;
 export const fmtBps = (bps: number, digits = 1) => `${(bps / 100).toFixed(digits)}%`;
+/** Amounts worth at least half a cent but too small for `maxFrac` decimals (the mainnet vault holds a few cents of BTC)
+ *  keep 3 significant digits; dust left after a sale still shows as 0. */
+export const fmtAmount = (x: number, maxFrac: number, usd: number) =>
+  usd >= 0.005 && x < 10 ** (1 - maxFrac)
+    ? x.toLocaleString("en-US", { maximumSignificantDigits: 3 })
+    : x.toLocaleString("en-US", { maximumFractionDigits: maxFrac });
 export const short = (a?: string, n = 4) => (a ? `${a.slice(0, 2 + n)}…${a.slice(-n)}` : "");
 
 export function ago(ts: number): string {

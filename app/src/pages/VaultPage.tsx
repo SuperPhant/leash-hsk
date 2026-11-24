@@ -13,7 +13,7 @@ import {
 } from "../data";
 import { helpReply, mandateChanged, propose, rulesReply, statusReply, type Proposal, type Reply } from "../chat";
 import { AddrLink, Badge, Card, Empty, LineChart, Spinner, Stat, TxLink, WeightBar } from "../ui";
-import { ago, duration, fmtPct, fmtUsd, short, useAsync } from "../util";
+import { ago, duration, fmtAmount, fmtPct, fmtUsd, short, useAsync } from "../util";
 import { LeashTester } from "./LeashTester";
 
 const PROFILE_NAMES: Record<string, string> = { steady: "Conservative", balanced: "Balanced", momentum: "Aggressive" };
@@ -58,13 +58,6 @@ export function explainRevert(e: unknown): string {
   }
   return (e as Error)?.message ?? String(e);
 }
-
-/** Amounts worth at least half a cent but too small for `maxFrac` decimals (the mainnet vault holds a few cents of BTC)
- *  keep 3 significant digits; dust left after a sale still shows as 0. */
-const fmtAmount = (x: number, maxFrac: number, usd: number) =>
-  usd >= 0.005 && x < 10 ** (1 - maxFrac)
-    ? x.toLocaleString("en-US", { maximumSignificantDigits: 3 })
-    : x.toLocaleString("en-US", { maximumFractionDigits: maxFrac });
 
 function Holdings({ v }: { v: VaultData }) {
   const now = Date.now() / 1000;

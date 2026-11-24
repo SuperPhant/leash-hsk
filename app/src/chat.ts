@@ -5,7 +5,7 @@
 // clamped to what the vault contract accepts before it is shown.
 import { PRESETS, TOKEN_BY_TICKER } from "./config";
 import type { Mandate, VaultData } from "./data";
-import { fmtPct, fmtUsd } from "./util";
+import { fmtAmount, fmtPct, fmtUsd } from "./util";
 
 export type Action =
   | { type: "preset"; preset: string }
@@ -48,16 +48,16 @@ export function statusReply(v: VaultData): Reply {
     ["Cash (USDT)", `${fmtUsd(v.cash)} · ${fmtPct(v.nav ? v.cash / v.nav : 0)}`],
     ["Drawdown from peak", `${(v.drawdownBps / 100).toFixed(2)}%${v.breakerTripped ? " · breaker TRIPPED (sells only)" : ""}`],
   ];
-  for (const h of v.holdings) {
-    if (h.raw === 0n) continue;
+  // Dust left after a sale (under half a cent) is not a position.
+  const held = v.holdings.filter((h) => h.raw > 0n && h.value >= 0.005);
+  for (const h of held) {
     rows.push([
-      `${h.ticker} ${h.amount.toLocaleString("en-US", { maximumFractionDigits: h.ticker === "BTC" ? 5 : 3 })}`,
+      `${h.ticker} ${fmtAmount(h.amount, h.ticker === "BTC" ? 5 : 3, h.value)}`,
       `${fmtUsd(h.value)} · ${fmtPct(h.weightBps / 10_000)} of NAV · entry ${fmtUsd(h.entryPrice, h.entryPrice < 1 ? 5 : 2)} · ${h.upnl >= 0 ? "+" : "-"}${fmtUsd(Math.abs(h.upnl))}${h.stopPrice ? ` · stop ${fmtUsd(h.stopPrice, h.stopPrice < 1 ? 5 : 2)}` : ""}`,
     ]);
   }
-  const open = v.holdings.filter((h) => h.raw > 0n).length;
   return {
-    text: open ? `Here is your vault right now (oracle prices, updated live):` : `Your vault is all in cash right now:`,
+    text: held.length ? `Here is your vault right now (oracle prices, updated live):` : `Your vault is all in cash right now:`,
     table: rows,
     actions: [],
     source: "rules",
