@@ -853,7 +853,9 @@ select.chip.net {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 460px;
+  /* The side column is sticky, so the chat card must fit under the top bar or its input drops off the screen:
+     440px covers the sticky offset, the card's header, chips and input, at up to 112% zoom. */
+  max-height: max(180px, min(460px, calc(100vh - 440px)));
   overflow-y: auto;
   padding: 4px 2px 8px;
 }
