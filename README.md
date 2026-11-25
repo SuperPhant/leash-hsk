@@ -12,6 +12,8 @@ Nov 22, with a small vault of real USDT.
   [`?net=mainnet`](https://superphant.github.io/leash-hsk/?net=mainnet))
 - **Mainnet vault:** [`0xa8137721…D7DB`](https://superphant.github.io/leash-hsk/?net=mainnet#/vault/0xa813772199915f36e74d636db7D7cFB2ED36D7DB),
   traded daily by the agent through the real HSKSwap pools; every contract verified on HSK Blockscout and Sourcify
+- **Demo video (2:44):** https://superphant.github.io/leash-hsk/demo.mp4 — recorded from the live app, narrated by a
+  synthetic voice
 - **Track:** HSK Chain Horizon Hackathon (Seoul), AI Agent Trading
 - **Built with:** HSKSwap (Uniswap V3) factory, pools and SwapRouter02 · APRO price feeds on HSK Chain mainnet ·
   Solidity/Foundry · TypeScript/viem · GitHub Actions · an open-weight LLM
