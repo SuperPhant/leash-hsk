@@ -1,24 +1,24 @@
 {
  "latest": {
-  "at": "2026-11-26T12:29:10.558Z",
+  "at": "2026-11-26T16:32:27.741Z",
   "agent": "0x447406ff8B4f98e4328974e26be1B92606D07f3d",
   "research": {
-   "asOf": "2026-11-26T12:28:08.000Z",
+   "asOf": "2026-11-26T16:28:59.000Z",
    "signals": [
     {
      "ticker": "HSK",
      "price": 0.07922687,
      "updatedAt": 1795661243,
-     "ageHours": 9.679166666666667,
+     "ageHours": 13.693333333333333,
      "stale": false,
      "ret1d": 0.017815332162265607,
      "ret7d": -0.05419001652604938,
      "ret30d": -0.11245516668962618,
      "vol30d": 0.23878615961881783,
      "maxDrawdown30d": -0.12799030898379438,
-     "mainnetPoolTwap": 0.07887662,
-     "mainnetPoolUsdtDepth": 414539.916597,
-     "aproVsPoolBps": -44,
+     "mainnetPoolTwap": 0.07922443,
+     "mainnetPoolUsdtDepth": 415514.754873,
+     "aproVsPoolBps": 0,
      "closes": 32,
      "historySource": "coingecko daily"
     },
@@ -26,7 +26,7 @@
      "ticker": "BTC",
      "price": 60263.6926807,
      "updatedAt": 1795634561,
-     "ageHours": 17.090833333333332,
+     "ageHours": 21.105,
      "stale": false,
      "ret1d": -0.0018295099134261195,
      "ret7d": -0.02677055366196779,
@@ -34,7 +34,7 @@
      "vol30d": 0.47593747808552017,
      "maxDrawdown30d": -0.27630417068899593,
      "mainnetPoolTwap": 59121.56827568,
-     "mainnetPoolUsdtDepth": 44348.119538,
+     "mainnetPoolUsdtDepth": 44348.994782,
      "aproVsPoolBps": -190,
      "closes": 32,
      "historySource": "coingecko daily"
@@ -42,8 +42,8 @@
     {
      "ticker": "ETH",
      "price": 1694.47950102,
-     "updatedAt": 1795696054,
-     "ageHours": 0.009444444444444445,
+     "updatedAt": 1795710500,
+     "ageHours": 0.010833333333333334,
      "stale": false,
      "ret1d": 0.0023434429744122465,
      "ret7d": -0.034808994386835046,
@@ -51,7 +51,7 @@
      "vol30d": 0.6638133927701154,
      "maxDrawdown30d": -0.33163235911171596,
      "mainnetPoolTwap": 1694.47950102,
-     "mainnetPoolUsdtDepth": 41724.245993,
+     "mainnetPoolUsdtDepth": 41724.358513,
      "aproVsPoolBps": null,
      "closes": 32,
      "historySource": "coingecko daily"
@@ -62,50 +62,160 @@
    {
     "vault": "0xc6c761dB028dC29e18E5d487982A39800e2e14A2",
     "name": "Steady BTC",
-    "status": "cooldown",
-    "at": "2026-11-26T12:28:11.692Z",
-    "epoch": 16,
+    "status": "rebalanced",
+    "at": "2026-11-26T16:29:03.885Z",
+    "epoch": 17,
     "nav": "$100,656.85",
     "pnl": "+$656.85",
-    "detail": "next trade allowed at 2026-11-26T14:27:24.000Z"
+    "tx": "0x1cfca094ced3572cb443c2a338d9ca3174186d05aa6a5d2d52ff614b53d8c7ae",
+    "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0xc6c761dB028dC29e18E5d487982A39800e2e14A2/17.json",
+    "detail": "sell BTC $4,719.67, sell ETH $3,265.96"
    },
    {
     "vault": "0x9b2D36C0f4c492397AaB3F85addD1Fe68680f6b5",
     "name": "Balanced Trio",
-    "status": "cooldown",
-    "at": "2026-11-26T12:28:12.133Z",
-    "epoch": 18,
+    "status": "rebalanced",
+    "at": "2026-11-26T16:29:14.881Z",
+    "epoch": 19,
     "nav": "$102,268.26",
     "pnl": "+$2,268.26",
-    "detail": "next trade allowed at 2026-11-26T12:28:12.000Z"
+    "tx": "0x91030bf3988c9c75dc9923317d6e8490b098b73a84f3de81d9d31bc3350b0205",
+    "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0x9b2D36C0f4c492397AaB3F85addD1Fe68680f6b5/19.json",
+    "detail": "sell BTC $9,740.58, sell ETH $20,223.98"
    },
    {
     "vault": "0xd50Ce76BBB531EFE171f4d69F93Ab7C95A0fac26",
     "name": "HSK Momentum",
     "status": "rebalanced",
-    "at": "2026-11-26T12:28:12.350Z",
-    "epoch": 16,
-    "nav": "$98,661.1",
-    "pnl": "-$1,338.9",
-    "tx": "0x6ee8fc5ef9d8fd0ec03f8a559d1cfcecb0549d1bbabf076fe20a972ea20193f0",
-    "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0xd50Ce76BBB531EFE171f4d69F93Ab7C95A0fac26/16.json",
-    "detail": "sell HSK $11,070.23, sell BTC $3,689.39, sell ETH $3,691.39"
+    "at": "2026-11-26T16:31:28.403Z",
+    "epoch": 17,
+    "nav": "$98,608.85",
+    "pnl": "-$1,391.15",
+    "tx": "0x0cd2186ede76cd6456a8b63c5df013a9924e0a6d0a338f3a6cad45cfe21db792",
+    "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0xd50Ce76BBB531EFE171f4d69F93Ab7C95A0fac26/17.json",
+    "detail": "buy HSK $11,093.5, buy BTC $3,697.83, buy ETH $3,697.83"
    },
    {
     "vault": "0x1De2F712e682B7C840C23F7acE456A91EA93d354",
     "name": "Balanced Trio",
-    "status": "rebalanced",
-    "at": "2026-11-26T12:28:25.708Z",
+    "status": "cooldown",
+    "at": "2026-11-26T16:32:27.222Z",
     "epoch": 14,
-    "nav": "$9,685.75",
-    "pnl": "-$314.25",
-    "tx": "0xde4c80649ecf7348126b7ad8f5f396d54cb1a2dbe89aec70cdb368bee0bbbd53",
-    "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0x1De2F712e682B7C840C23F7acE456A91EA93d354/14.json",
-    "detail": "sell ETH $14.23"
+    "nav": "$9,685.7",
+    "pnl": "-$314.3",
+    "detail": "next trade allowed at 2026-11-26T16:29:10.000Z"
    }
   ]
  },
  "history": [
+  {
+   "at": "2026-11-26T16:32:27.741Z",
+   "agent": "0x447406ff8B4f98e4328974e26be1B92606D07f3d",
+   "research": {
+    "asOf": "2026-11-26T16:28:59.000Z",
+    "signals": [
+     {
+      "ticker": "HSK",
+      "price": 0.07922687,
+      "updatedAt": 1795661243,
+      "ageHours": 13.693333333333333,
+      "stale": false,
+      "ret1d": 0.017815332162265607,
+      "ret7d": -0.05419001652604938,
+      "ret30d": -0.11245516668962618,
+      "vol30d": 0.23878615961881783,
+      "maxDrawdown30d": -0.12799030898379438,
+      "mainnetPoolTwap": 0.07922443,
+      "mainnetPoolUsdtDepth": 415514.754873,
+      "aproVsPoolBps": 0,
+      "closes": 32,
+      "historySource": "coingecko daily"
+     },
+     {
+      "ticker": "BTC",
+      "price": 60263.6926807,
+      "updatedAt": 1795634561,
+      "ageHours": 21.105,
+      "stale": false,
+      "ret1d": -0.0018295099134261195,
+      "ret7d": -0.02677055366196779,
+      "ret30d": -0.25416989987403105,
+      "vol30d": 0.47593747808552017,
+      "maxDrawdown30d": -0.27630417068899593,
+      "mainnetPoolTwap": 59121.56827568,
+      "mainnetPoolUsdtDepth": 44348.994782,
+      "aproVsPoolBps": -190,
+      "closes": 32,
+      "historySource": "coingecko daily"
+     },
+     {
+      "ticker": "ETH",
+      "price": 1694.47950102,
+      "updatedAt": 1795710500,
+      "ageHours": 0.010833333333333334,
+      "stale": false,
+      "ret1d": 0.0023434429744122465,
+      "ret7d": -0.034808994386835046,
+      "ret30d": -0.2781225950400448,
+      "vol30d": 0.6638133927701154,
+      "maxDrawdown30d": -0.33163235911171596,
+      "mainnetPoolTwap": 1694.47950102,
+      "mainnetPoolUsdtDepth": 41724.358513,
+      "aproVsPoolBps": null,
+      "closes": 32,
+      "historySource": "coingecko daily"
+     }
+    ]
+   },
+   "vaults": [
+    {
+     "vault": "0xc6c761dB028dC29e18E5d487982A39800e2e14A2",
+     "name": "Steady BTC",
+     "status": "rebalanced",
+     "at": "2026-11-26T16:29:03.885Z",
+     "epoch": 17,
+     "nav": "$100,656.85",
+     "pnl": "+$656.85",
+     "tx": "0x1cfca094ced3572cb443c2a338d9ca3174186d05aa6a5d2d52ff614b53d8c7ae",
+     "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0xc6c761dB028dC29e18E5d487982A39800e2e14A2/17.json",
+     "detail": "sell BTC $4,719.67, sell ETH $3,265.96"
+    },
+    {
+     "vault": "0x9b2D36C0f4c492397AaB3F85addD1Fe68680f6b5",
+     "name": "Balanced Trio",
+     "status": "rebalanced",
+     "at": "2026-11-26T16:29:14.881Z",
+     "epoch": 19,
+     "nav": "$102,268.26",
+     "pnl": "+$2,268.26",
+     "tx": "0x91030bf3988c9c75dc9923317d6e8490b098b73a84f3de81d9d31bc3350b0205",
+     "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0x9b2D36C0f4c492397AaB3F85addD1Fe68680f6b5/19.json",
+     "detail": "sell BTC $9,740.58, sell ETH $20,223.98"
+    },
+    {
+     "vault": "0xd50Ce76BBB531EFE171f4d69F93Ab7C95A0fac26",
+     "name": "HSK Momentum",
+     "status": "rebalanced",
+     "at": "2026-11-26T16:31:28.403Z",
+     "epoch": 17,
+     "nav": "$98,608.85",
+     "pnl": "-$1,391.15",
+     "tx": "0x0cd2186ede76cd6456a8b63c5df013a9924e0a6d0a338f3a6cad45cfe21db792",
+     "note": "https://raw.githubusercontent.com/SuperPhant/leash-hsk/notes/133/0xd50Ce76BBB531EFE171f4d69F93Ab7C95A0fac26/17.json",
+     "detail": "buy HSK $11,093.5, buy BTC $3,697.83, buy ETH $3,697.83"
+    },
+    {
+     "vault": "0x1De2F712e682B7C840C23F7acE456A91EA93d354",
+     "name": "Balanced Trio",
+     "status": "cooldown",
+     "at": "2026-11-26T16:32:27.222Z",
+     "epoch": 14,
+     "nav": "$9,685.7",
+     "pnl": "-$314.3",
+     "detail": "next trade allowed at 2026-11-26T16:29:10.000Z"
+    }
+   ]
+  },
   {
    "at": "2026-11-26T12:29:10.558Z",
    "agent": "0x447406ff8B4f98e4328974e26be1B92606D07f3d",
