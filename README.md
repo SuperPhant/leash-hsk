@@ -40,6 +40,24 @@ Nov 22, with a small vault of real USDT.
 5. **Rules in plain words.** "Max 15% in HSK", "trade at most every 8 hours" or "I'm worried about a crash" become a
    concrete rule change, clamped to what the contract accepts, shown as a diff and signed by the owner.
 
+## Proof on chain
+
+- **Mainnet trades through the real HSKSwap pools:** the agent's two rebalances of the mainnet vault,
+  [Nov 22](https://hsk.blockscout.com/tx/0x2482113665c33a55abf8ac20dff2b1730013d4cfbcb455b7628914c1558b0db5) and
+  [Nov 24](https://hsk.blockscout.com/tx/0xbbe8a105f823837ce9b46f32fe15cfdf9d77a5586de03a191641d3be30f8484b). On the
+  other days it found the vault on target and did not trade.
+- **A stop-loss that fired by itself:** on Nov 25 BTC, ETH and HSK fell through the 3% stops of the testnet community
+  vault [`0x1De2…d354`](https://superphant.github.io/leash-hsk/?net=testnet#/vault/0x1De2F712e682B7C840C23F7acE456A91EA93d354),
+  and the keeper, not the AI, sold all three:
+  [BTC](https://testnet-explorer.hsk.xyz/tx/0xb14dcf209c63965ac83dc98e6cbaec5e0652354a998bb537c2f9b004c4f098d7),
+  [ETH](https://testnet-explorer.hsk.xyz/tx/0x0cd405ae4ca9aba3c0c4ddc987aa8ebca9c38aea32ef7d214834154ea27c366e),
+  [HSK](https://testnet-explorer.hsk.xyz/tx/0x9a0a80b117efb8ebee868f47f2e94ef20234832db2b1f3d00e9dac0d7b182198).
+- **A rule change the agent had to follow:** the owner of that vault said "Max 15% in HSK" in the chat and signed it
+  ([`setCap`](https://testnet-explorer.hsk.xyz/tx/0xbaf2f5f1b7fa1b117efad1dd0e36e7284efacea5c80719ab420f822ed2673632),
+  Nov 25 00:06 UTC) while HSK was 19.9% of the vault. The agent's next run, 15 minutes later, sold HSK to fit
+  ([`rebalance`](https://testnet-explorer.hsk.xyz/tx/0xd839cf6cd711c5d2f7b79ba28897818db4b812c0586d4d3f38a44a6d4a7d00fc)),
+  and the leash has clipped the model's larger HSK proposals to 15% since.
+
 ## What it does
 
 | The track asks for | Leash |
@@ -166,7 +184,9 @@ match).
 The vault started with 0.887 USDT under the Balanced rules (caps BTC 40%, ETH 35%, HSK 25%, 15% cash floor, 12%
 stop-loss, 20% drawdown breaker). The agent's first mainnet rebalance bought BTC $0.13, ETH $0.18 and HSK $0.13
 through the real pools:
-[`0x24821136…58b0db5`](https://hsk.blockscout.com/tx/0x2482113665c33a55abf8ac20dff2b1730013d4cfbcb455b7628914c1558b0db5).
+[`0x24821136…58b0db5`](https://hsk.blockscout.com/tx/0x2482113665c33a55abf8ac20dff2b1730013d4cfbcb455b7628914c1558b0db5);
+the second, on Nov 24, sold ETH $0.18 and bought BTC $0.15:
+[`0xbbe8a105…0f8484b`](https://hsk.blockscout.com/tx/0xbbe8a105f823837ce9b46f32fe15cfdf9d77a5586de03a191641d3be30f8484b).
 The agent key holds a few HSK for gas and can only call `rebalance`; the owner is a separate key. Before going live,
 `agent/src/deployMainnet.ts` was rehearsed on a local fork of mainnet (about 12.3M gas for the deployment, 1.0M for a
 rebalance), and the mainnet fork test (`contracts/test/Mainnet.t.sol`) creates a vault and buys WHSK through the real
@@ -207,12 +227,13 @@ that schedule, because GitHub's own cron trigger ran hours late for this reposit
   wider spread than it would on mainnet. The track record counts that cost; it shows up in "Trading added".
 - On Nov 21 the hourly keeper did not run on schedule, so the trades at 06:23 and 09:10 UTC used prices relayed hours
   earlier (BTC about 4% and ETH about 5% below the live mainnet price). A wrong entry price distorts a 24-hour grade,
-  so the track record lists those ten trades but leaves them out of its hit rate and value added (with them, the
-  value added would have read about +$4,800 instead of about +$160). The agent now runs a keeper pass right before
-  trading, and `tick.yml` keeps the keeper on time.
-- The track record does not flatter the agent. As of Nov 24 its graded calls were close to a coin flip (11 right, 11
-  wrong, 8 flat on the testnet; 2 right and 1 wrong on mainnet), and against simply holding their first allocation
-  the testnet vaults ranged from −0.70% to +0.22%. Leash's claim is not that the agent beats the market; it is that
+  so the track record lists those ten trades but leaves them out of its hit rate and value added (on Nov 24, with
+  them, the value added would have read about +$4,800 instead of about +$160). The agent now runs a keeper pass
+  right before trading, and `tick.yml` keeps the keeper on time.
+- The track record does not flatter the agent. As of Nov 26 its graded calls are close to a coin flip (45 right, 42
+  wrong, 8 flat on the testnet; 3 right and 2 wrong on mainnet), trading cost the testnet vaults $485 on about
+  $380,000 traded compared with not trading, and against simply holding their first allocation the testnet vaults
+  are 0.04% to 2.45% behind (mainnet 0.39%). Leash's claim is not that the agent beats the market; it is that
   the agent cannot break its owner's rules, and that anyone can check every decision it made.
 - This is a hackathon prototype, not a financial service. The mainnet vault holds under a dollar of our own USDT; the
   app takes no deposits from the public, holds no one else's assets and collects no personal data. Offering it as a
