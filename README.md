@@ -42,10 +42,12 @@ Nov 22, with a small vault of real USDT.
 
 ## Proof on chain
 
-- **Mainnet trades through the real HSKSwap pools:** the agent's two rebalances of the mainnet vault,
-  [Nov 22](https://hsk.blockscout.com/tx/0x2482113665c33a55abf8ac20dff2b1730013d4cfbcb455b7628914c1558b0db5) and
-  [Nov 24](https://hsk.blockscout.com/tx/0xbbe8a105f823837ce9b46f32fe15cfdf9d77a5586de03a191641d3be30f8484b). On the
-  other days it found the vault on target and did not trade.
+- **Mainnet trades through the real HSKSwap pools:** the agent's three rebalances of the mainnet vault,
+  [Nov 22](https://hsk.blockscout.com/tx/0x2482113665c33a55abf8ac20dff2b1730013d4cfbcb455b7628914c1558b0db5),
+  [Nov 24](https://hsk.blockscout.com/tx/0xbbe8a105f823837ce9b46f32fe15cfdf9d77a5586de03a191641d3be30f8484b) and
+  [Nov 26](https://hsk.blockscout.com/tx/0xde81712144b76d921276667130d1b0342161f42d082746c3e54f1ef46d14f07b). On the
+  other days it found the vault on target and did not trade. On Nov 26 the model proposed 35% BTC; the agent's own
+  leash lets it add at most 3 points to its rules baseline of 13.4%, so it bought up to 16.4% instead.
 - **A stop-loss that fired by itself:** on Nov 25 BTC, ETH and HSK fell through the 3% stops of the testnet community
   vault [`0x1De2…d354`](https://superphant.github.io/leash-hsk/?net=testnet#/vault/0x1De2F712e682B7C840C23F7acE456A91EA93d354),
   and the keeper, not the AI, sold all three:
@@ -186,7 +188,9 @@ stop-loss, 20% drawdown breaker). The agent's first mainnet rebalance bought BTC
 through the real pools:
 [`0x24821136…58b0db5`](https://hsk.blockscout.com/tx/0x2482113665c33a55abf8ac20dff2b1730013d4cfbcb455b7628914c1558b0db5);
 the second, on Nov 24, sold ETH $0.18 and bought BTC $0.15:
-[`0xbbe8a105…0f8484b`](https://hsk.blockscout.com/tx/0xbbe8a105f823837ce9b46f32fe15cfdf9d77a5586de03a191641d3be30f8484b).
+[`0xbbe8a105…0f8484b`](https://hsk.blockscout.com/tx/0xbbe8a105f823837ce9b46f32fe15cfdf9d77a5586de03a191641d3be30f8484b);
+the third, on Nov 26, sold BTC $0.13 and bought ETH $0.11:
+[`0xde817121…d14f07b`](https://hsk.blockscout.com/tx/0xde81712144b76d921276667130d1b0342161f42d082746c3e54f1ef46d14f07b).
 The agent key holds a few HSK for gas and can only call `rebalance`; the owner is a separate key. Before going live,
 `agent/src/deployMainnet.ts` was rehearsed on a local fork of mainnet (about 12.3M gas for the deployment, 1.0M for a
 rebalance), and the mainnet fork test (`contracts/test/Mainnet.t.sol`) creates a vault and buys WHSK through the real
@@ -230,17 +234,18 @@ that schedule, because GitHub's own cron trigger ran hours late for this reposit
   so the track record lists those ten trades but leaves them out of its hit rate and value added (on Nov 24, with
   them, the value added would have read about +$4,800 instead of about +$160). The agent now runs a keeper pass
   right before trading, and `tick.yml` keeps the keeper on time.
-- The track record does not flatter the agent. As of Nov 26 its graded calls are close to a coin flip (45 right, 42
-  wrong, 8 flat on the testnet; 3 right and 2 wrong on mainnet), trading cost the testnet vaults $485 on about
-  $380,000 traded compared with not trading, and against simply holding their first allocation the testnet vaults
-  are 0.04% to 2.45% behind (mainnet 0.39%). Leash's claim is not that the agent beats the market; it is that
+- The track record does not flatter the agent. As of Nov 27 its graded calls are close to a coin flip (55 right, 58
+  wrong, 8 flat on the testnet; 3 right and 2 wrong on mainnet), trading cost the testnet vaults $1,487 on about
+  $510,000 traded compared with not trading, and against simply holding their first allocation the testnet vaults
+  are 0.01% to 2.34% behind (mainnet about 0.5%). Leash's claim is not that the agent beats the market; it is that
   the agent cannot break its owner's rules, and that anyone can check every decision it made.
 - This is a hackathon prototype, not a financial service. The mainnet vault holds under a dollar of our own USDT; the
   app takes no deposits from the public, holds no one else's assets and collects no personal data. Offering it as a
   service in Korea or elsewhere would need its own legal review.
-- Not related to the project named "Leash" in this hackathon's HSP payments track (agent spending budgets, another
-  team). This Leash has been public since Nov 20 ([SuperPhant/leash](https://github.com/SuperPhant/leash), on Base)
-  and Nov 21 (this repository).
+- Not related to the two other builds named "Leash" in this hackathon, both by other teams: one in the HSP payments
+  track (agent spending budgets) and one submitted to the AI Agent Trading track on Nov 26. This Leash has been public
+  since Nov 20 ([SuperPhant/leash](https://github.com/SuperPhant/leash), on Base) and Nov 21 (this repository), and
+  live on HSK Chain mainnet since Nov 22.
 - Built by Phant Studio with AI coding assistants (GitHub Copilot). Not investment advice.
 
 MIT licence.
